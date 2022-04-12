@@ -78,3 +78,5 @@ func main(){
 }
 ```
 
+此时我们在executePanic中用recover，那么挂掉的只是executePanic，他不会抛到main中，所以main能继续运行，继而main开辟的其他函数也能继续运行。
+

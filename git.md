@@ -32,7 +32,7 @@ cat 文件名      用来查看文件内容。
 
 git checkout -- 文件名        中的 -- 很重要，如果没有 -- 的话，那么命令变成创建分支了。撤销工作区上的所有修改，退回到上一个版本，若暂存区有文件的话，退回到暂存区版本。
 
-git token 密钥 git remote add origin https://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@github.com/Caesium-Fe/markdownInJob.git
+git token 密钥 git remote add origin https://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@github.com/Caesium-Fe/markdownInJob.git(这个token已经废弃，需要用下面的token)
 
 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
 
