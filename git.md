@@ -1,12 +1,12 @@
-<h1>Git手册</h1>
+# Git手册
 
-<h2>SVN和Git区别</h2>
+## SVN和Git区别
 
 svn：集中式版本控制系统，所有版本库都是集中放在中央服务器的，更新提交都是提交到中央服务器，所以需要联网才能工作，局域网和广域网都可以，但是会受到网速的影响。
 
 git：分布式版本控制系统，每个用户的电脑都可以是一个完整的版本库，只需要相互之间推送修改就可以。
 
-<h2>Git指令</h2>
+## Git指令
 
 git config --global 参数 “数据”  属于是全局配置即所有的版本库都是用这个配置
 
@@ -33,4 +33,8 @@ cat 文件名      用来查看文件内容。
 git checkout -- 文件名        中的 -- 很重要，如果没有 -- 的话，那么命令变成创建分支了。撤销工作区上的所有修改，退回到上一个版本，若暂存区有文件的话，退回到暂存区版本。
 
 git token 密钥 git remote add origin https://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@github.com/Caesium-Fe/markdownInJob.git
+
+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
+
+修改现有项目的url的请求 git remote set-url origin https://<你的令牌>@github.com/<你的git用户名>/<要修改的仓库名>.git
 
