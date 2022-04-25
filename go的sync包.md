@@ -1,3 +1,5 @@
+https://blog.csdn.net/luoye4321/article/details/82433144
+
 一. 前言
 Golang sync包提供了基础的异步操作方法，包括互斥锁Mutex，执行一次Once和并发等待组WaitGroup。
 本文主要介绍sync包提供的这些功能的基本使用方法。
@@ -373,5 +375,4 @@ func (m *Map) Delete(key interface{})
 // 遍历map，仍然是无序的
 func (m *Map) Range(f func(key, value interface{}) bool)
 ```
-
 

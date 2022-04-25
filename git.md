@@ -38,3 +38,38 @@ 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
 
 修改现有项目的url的请求 git remote set-url origin https://<你的令牌>@github.com/<你的git用户名>/<要修改的仓库名>.git
 
+# Git建分支的基本步骤
+
+1.本地建立分支并切换到分支上
+git checkout -b dev  ------>git branch dev 和 git checkout dev
+
+2.push dev分支到远程仓库上面
+git push origin dev
+
+3.查看所有的分支并且看情况删除某些分支
+git branch -a   查看所有分支
+
+git branch -D test  删除本地的test分支
+
+git push origin --delete test  删除远程分支test
+
+第三步非必需，看着办就行
+
+4.切换到dev分支上，可用git status查看在哪个分支
+git checkout dev 切换到dev分支
+
+5.提交dev分支的内容修改到远程dev分支上面
+git add .
+git commit -m "this is dev"
+git push --set-upstream origin dev    或者直接 git push origin dev (执行失败就用前者)
+
+6.切换到本地master分支上面
+git checkout master
+
+7.将本地分支和合并到本地master分支上面来
+git merge dev
+
+8.合并后的master分支远程到仓库
+git push origin master
+
+9.按理说是要删掉本地和远程的分支的。。到时候记得删就行
