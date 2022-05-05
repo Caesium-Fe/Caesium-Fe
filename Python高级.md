@@ -2,6 +2,8 @@
 
 python 可以在运行（不是程序动起来，而是可以在后面的代码中进行修改或追加或删除）时，对类添加属性或方法。
 
+在没有将pip配置为环境变量时使用方法为：python -m pip install [packagename]
+
 input函数的格式为统一字符串。
 
 zfill函数可以在输出字符前添加0，达到格式标准。
@@ -15,6 +17,16 @@ zfill函数可以在输出字符前添加0，达到格式标准。
 ​					这里的对象名或类名的应用范围同上。
 
 在调用实例方法时，默认会传输self对象参数，而调用类方法时（@classmethod装饰器），传输的时cls参数。
+
+## 时间日期包使用
+
+获取当前时间 datetime.datetime.now() 注意这个输出的是个datetime.datetime类型数据
+
+时间数据的模板为：%Y-%m-%d %H:%M:%S
+
+datetime类型转换为字符串类型使用：strftime，反向转换使用：strptime
+
+
 
 ## 高阶函数
 
