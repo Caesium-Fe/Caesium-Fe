@@ -20,13 +20,21 @@ zfill函数可以在输出字符前添加0，达到格式标准。
 
 ## 时间日期包使用
 
+## datetime.datetime
+
 获取当前时间 datetime.datetime.now() 注意这个输出的是个datetime.datetime类型数据
 
 时间数据的模板为：%Y-%m-%d %H:%M:%S
 
-datetime类型转换为字符串类型使用：strftime，反向转换使用：strptime
+datetime.datetime类型转换为字符串类型使用：strftime，反向转换使用：strptime，注意这里的参数必须是字符串，需要年月日或者时间的话，用模板进行样式修改。
 
+时间日期计算使用 日期+datetime.timedelta(days=时间跨度(float)，seconds=时间跨度(float)) **正负参数代表时间的前进后退**
 
+## datetime.date
+
+isoweekday()可以查看日期为星期几(1-7)返回值为int型
+
+isocalendar()可以查看日期为（多少年，多少周，星期几）返回值为元组
 
 ## 高阶函数
 
@@ -72,6 +80,38 @@ sorted
 **for i in range(len())与len()后在丢入循环range中的效率都是一致的。**
 
 逻辑判断的顺序为NOT-->AND-->OR
+
+# pandas使用
+
+打开需要处理的文件用read_文件类型的函数：read_csv("test.csv")  
+
+1、**filepath_or_buffer：**数据输入的路径：可以是文件路径、可以是URL，也可以是实现read方法的任意对象(open操作)。
+
+**2、sep：**读取csv文件时指定的分隔符，默认为逗号。注意："csv文件的分隔符" 和 "我们读取csv文件时指定的分隔符" 一定要一致。
+
+**3、delimiter ：**分隔符的另一个名字，与 sep 功能相似。
+
+**4、delim_whitespace ：**默认为 False，设置为 True 时，表示分割符为空白字符，可以是空格、"\t"等等。不管分隔符是什么，只要是空白字符，那么可以通过delim_whitespace=True进行读取。
+
+**5、header：**设置导入 DataFrame 的列名称，默认为 "infer"，注意它与下面介绍的 names 参数的微妙关系。
+
+**6、names：**当names没被赋值时，header会变成0，即选取数据文件的第一行作为列名；当 names 被赋值，header 没被赋值时，那么header会变成None。如果都赋值，这个时候，相当于先不看names，只看header，header为0代表先把第一行当做表头，下面的当成数据；然后再把表头用names给替换掉。
+
+**7、index_col：**用于指定某列为索引，那么读取出来的数据就不会自动添加一列索引，在重新写入数据的时候就不会出现多出一列。
+
+**8、usecols：**如果一个数据集中有很多列，但是我们在读取的时候只想要使用到的列，我们就可以使用这个参数。当多列时使用列表作为参数值。
+
+**9、mangle_dupe_cols：**在实际工作中，我们得到的数据会很复杂，有时导入的数据会含有名字相同的列。参数 mangle_dupe_cols 会将重名的列后面多一个 .1，该参数默认为 True，如果设置为 False，会抛出不支持的异常：
+
+**10、prefix：**当导入的数据设置header=None 时，设置此参数会自动加一行name。
+
+
+
+返回的是读取了的数据，按照第一行的标题来命名每一列，所以可以直接按照列的名称来取出整列的数据。
+
+只会按照列来循环 for col in test: print(test[col])
+
+
 
 ## Numpy库使用
 
@@ -219,4 +259,136 @@ rep.delete_cookie(key)
 ## Django中的Middleware
 
 https://m.runoob.com/django/django-middleware.html
+
+# Flask框架
+
+Flask基于Werkzeug WSGI工具包和Jinja2模板引擎。
+
+在调试过程中开发使用app.run(debug=True)启动flask项目。
+
+## 路由：
+
+1.使用@app.route('/madasd')将路由与函数绑定。
+
+2.使用app.add_url_rule()函数来将路由与函数绑定。参数为（'/','hello',函数名）
+
+路由还可以是动态变换的：
+
+在route()注解中加入路由和变量。例如:
+
+```python
+@app.route('/hello/<name>')
+
+def hello_name(name):
+
+	return name
+```
+
+**注意一点的是路由在写成斜杠结尾时，可以不用在路由中明确写出也可访问，但是末尾斜杠省掉，则路由一定不能出现斜杠，否则返回404**
+
+url_for()函数用于动态构建特定函数的URL。都是来自flask库。
+
+```python
+from flask import Flask, redirect, url_for, request
+
+@app.route('/admin') 
+def hello_admin():   
+	return 'Hello Admin'
+
+@app.route('/guest/<guest>')
+def hello_guest(guest):   
+	return 'Hello %s as Guest' % guest
+
+@app.route('/user/<name>') 
+def hello_user(name):   
+	if name =='admin':      
+		return redirect(url_for('hello_admin'))  
+	else:      
+		return redirect(url_for('hello_guest', guest = name))
+```
+
+Flask默认的路由响应为GET请求，但也可以通过route装饰器提供方法参数来进行配置。将以下脚本另存为login.html
+
+```html
+<html>
+   <body>
+      <form action = "http://localhost:5000/login" method = "post">
+         <p>Enter Name:</p>
+         <p><input type = "text" name = "nm" /></p>
+         <p><input type = "submit" value = "submit" /></p>
+      </form>
+   </body>
+</html>
+```
+
+现在在Python shell中输入以下脚本：
+
+```python
+from flask import Flask, redirect, url_for, request
+app = Flask(__name__)
+
+@app.route('/success/<name>')
+def success(name):
+   return 'welcome %s' % name
+
+@app.route('/login',methods = ['POST', 'GET'])
+def login():
+   if request.method == 'POST':
+      # 请求的表单信息通过name属性里的值来获取
+      user = request.form['nm']
+      return redirect(url_for('success',name = user))
+   else:
+      user = request.args.get('nm')
+      return redirect(url_for('success',name = user))
+
+if __name__ == '__main__':
+   app.run(debug = True)
+```
+
+flask的模板语言为  {{ 变量名 }}    用render_template( 'html文件' ，html中的变量名=视图函数中的变量名)
+
+## Flask Request对象
+
+Request对象的重要属性如下所列：
+
+- **Form** - 它是一个字典对象，包含表单参数及其值的键和值对。
+- **args** - 解析查询字符串的内容，它是问号（？）之后的URL的一部分。
+- **Cookies** - 保存Cookie名称和值的字典对象。
+- **files** - 与上传文件有关的数据。
+- **method** - 当前请求方法。
+
+## Flask Cookies
+
+make_response属于Flask文件，所以直接导入。
+
+```python
+from flask import Flask, make_response, request # 注意需导入 make_response
+
+app = Flask(__name__)
+
+@app.route("/set_cookies")
+def set_cookie():
+    resp = make_response("success")
+    resp.set_cookie("w3cshool", "w3cshool",max_age=3600)    
+    return resp
+
+@app.route("/get_cookies")
+def get_cookie():
+    # 获取名字为Itcast_1对应cookie的值
+    cookie_1 = request.cookies.get("w3cshool")  
+    return cookie_1
+
+@app.route("/delete_cookies")
+def delete_cookie():
+    # 注意删除，只是让cookie过期
+    resp = make_response("del success")
+    resp.delete_cookie("w3cshool")
+    return resp
+```
+
+## Flask 重定向和错误
+
+redirect()函数用来返回一个响应对象，并将用户重定向到指定状态码的另一个目标位置。错误状态码可以使用abort()函数来进行更改。这两个函数都在flask文件中导入。
+
+## Flask 消息闪现
 
