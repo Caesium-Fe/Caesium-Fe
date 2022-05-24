@@ -20,3 +20,4 @@ ssh.connect('IP',22,'用户名','密码')
 stdin, stdout, stderr = ssh.exec_command('df')
 ```
 
+>>>>>>> 

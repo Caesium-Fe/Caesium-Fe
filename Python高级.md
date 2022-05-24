@@ -170,9 +170,13 @@ Numpy.array.reshape(参数可以为多个)函数可以重塑数组的形状，�
 
 创建对象属性时，可以在构造方法里用，self.属性字段 格式来初始化， 也可以用在构造方法同级，属性字段 格式来初始化。
 
-## pywinauto库
+## pyautogui库
 
-实现windows下，软件的自动操作，但是版本库要和软件相互兼容，例如：32位库只能操作32位软件，64位库操作64位软件。
+可以实现控制电脑的鼠标和键盘
+
+## pyWin32库
+
+实现windows下软件的自动脚本
 
 # python操作数据库
 
@@ -409,4 +413,3 @@ Flask项目的文件目录为：功能模块(蓝图)文件夹放功能模块代�
 ```python
 upload = Blueprint("upload", __name__, template_folder="../templates", static_folder='../static')
 ```
-

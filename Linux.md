@@ -1,7 +1,3 @@
-centos-username:root
-
-centos-password：654321
-
 # linux命令：
 
 ## vi/vim命令:
@@ -83,4 +79,3 @@ putty默认的快捷粘贴复制的功能：**鼠标选中默认复制，右键�
 可以保存session，最好按照ip地址来进行命名。
 
 putty下载地址：https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
-
