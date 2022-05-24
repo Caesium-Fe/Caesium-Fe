@@ -105,6 +105,14 @@ sorted
 
 **10、prefix：**当导入的数据设置header=None 时，设置此参数会自动加一行name。
 
+通用解析参数
+
+pandas有两个解析引擎，默认为c但是当指定的参数c无法解析时会退化成python，这个时候需要将engine指定为python，并可以加上encoding='utf-8'
+
+true_values和false_value可以指定什么数据为true或false true_values=["数据值"]
+
+skipfooter：从文件末尾过滤行，解析引擎退化为 Python。这是因为 C 解析引擎没有这个特性。
+
 
 
 返回的是读取了的数据，按照第一行的标题来命名每一列，所以可以直接按照列的名称来取出整列的数据。
@@ -162,13 +170,9 @@ Numpy.array.reshape(参数可以为多个)函数可以重塑数组的形状，�
 
 创建对象属性时，可以在构造方法里用，self.属性字段 格式来初始化， 也可以用在构造方法同级，属性字段 格式来初始化。
 
-## pyautogui库
+## pywinauto库
 
-可以实现控制电脑的鼠标和键盘
-
-## pyWin32库
-
-实现windows下软件的自动脚本
+实现windows下，软件的自动操作，但是版本库要和软件相互兼容，例如：32位库只能操作32位软件，64位库操作64位软件。
 
 # python操作数据库
 
@@ -391,4 +395,18 @@ def delete_cookie():
 redirect()函数用来返回一个响应对象，并将用户重定向到指定状态码的另一个目标位置。错误状态码可以使用abort()函数来进行更改。这两个函数都在flask文件中导入。
 
 ## Flask 消息闪现
+
+
+
+## Flask蓝图(BluePrint)
+
+Flask项目的文件目录为：功能模块(蓝图)文件夹放功能模块代码，static文件夹放js脚本，templates文件夹放html静态页面，app.py启动文件。
+
+注意蓝图模块，需要导入模块    from flask import Blueprint
+
+蓝图模块对象的生成：
+
+```python
+upload = Blueprint("upload", __name__, template_folder="../templates", static_folder='../static')
+```
 
