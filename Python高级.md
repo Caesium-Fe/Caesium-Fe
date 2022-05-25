@@ -420,3 +420,4 @@ Flask-email邮件扩展包：使用邮件服务器来进行邮件的发送。
 
 Flask-WTF表单验证扩展包：用来验证提交的表单的内容是否符合要求。
 
+Flask-sijax简单异步请求包：使用jQuery.ajax来发出AJAX请求。
