@@ -119,6 +119,73 @@ skipfooter：从文件末尾过滤行，解析引擎退化为 Python。这是因
 
 只会按照列来循环 for col in test: print(test[col])
 
+loc属性可以返回 指定索引 对应到某一行的数据。
+
+```python
+data = {
+ "calories": [420, 380, 390],
+ "duration": [50, 40, 45]
+}
+
+df = pd.DataFrame(data, index = ["day1", "day2", "day3"])
+# 指定索引
+print(df.loc["day2"])
+```
+
+## Pandas JSON
+
+常规json可以这样处理：
+
+```python
+# 这里的url 可以是文件的网址，也可以是文件的路径
+df = pd.read_json(url)
+print(df)
+```
+
+内嵌的json：
+
+```json
+{
+  "school_name": "ABC primary school",
+  "class": "Year 1",
+  "students": [
+  {
+    "id": "A001",
+    "name": "Tom",
+    "math": 60,
+    "physics": 66,
+    "chemistry": 61
+  },
+  {
+    "id": "A002",
+    "name": "James",
+    "math": 89,
+    "physics": 76,
+    "chemistry": 51
+  },
+  {
+    "id": "A003",
+    "name": "Jenny",
+    "math": 79,
+    "physics": 90,
+    "chemistry": 78
+  }]
+}
+```
+
+可以这样处理，需要使用到 **json_normalize()** 方法将内嵌的数据完整的解析出来：
+
+```python
+import pandas as pd
+import json
+# 使用 Python JSON 模块载入数据
+with open('nested_list.json','r') as f:
+  data = json.loads(f.read())
+# 展平数据
+df_nested_list = pd.json_normalize(data, record_path =['students'])
+print(df_nested_list)
+```
+
 
 
 ## Numpy库使用
