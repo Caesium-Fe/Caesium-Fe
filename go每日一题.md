@@ -55,3 +55,37 @@ aa := fmt.Sprintf("%f",varsa) // 转换为字符串
 var3, error3 := strconv.ParseFloat(aa, 32) // 字符串转值类型
 ```
 
+## 接口问题
+
+```go
+type A interface {
+	ShowA() int
+}
+
+type B interface {
+	ShowB() int
+}
+
+type Work struct {
+	i int
+}
+
+func (w Work) ShowA() int {
+	return w.i + 10
+}
+
+func (w Work) ShowB() int {
+	return w.i + 20
+}
+
+func Test2() {
+	c := Work{3}
+	var a A = c
+	var b B = c
+	fmt.Println(a.ShowA())
+	fmt.Println(b.ShowB())
+}//输出结果为：13 23
+```
+
+这个问题反映的是接口，一种类型实现多个接口，结构体work分别实现了接口A、B,所以接口变量a,b分别实现各自的方法，输出不同结果。
+
