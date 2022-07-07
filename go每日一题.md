@@ -1,3 +1,7 @@
+---
+typora-root-url: typora-user-images
+---
+
 ```go
 func main() {
 	str := "hello"
@@ -54,6 +58,30 @@ varsa2 := int(varsa) // 这样会损失精度， 0.9直接被丢弃
 aa := fmt.Sprintf("%f",varsa) // 转换为字符串
 var3, error3 := strconv.ParseFloat(aa, 32) // 字符串转值类型
 ```
+
+## 变量声明与赋值问题
+
+```go
+func Dif_var_make() {
+	// 以下只是声明m变量，但并没有分配内存
+	//顾不可以直接进行赋值操作
+	// var m map[string]int
+	// m["a"] = 1
+	//由于没有 "b" 元素，v会返回值类型对应的零值
+	// if v := m["b"]; v != nil {
+	// 	fmt.Println(v)
+	// }
+
+	m := make(map[string]int)
+	m["a"] = 1
+	//由于没有 "b" 元素，ok就为false
+	if v, ok := m["b"]; ok {
+		fmt.Println(v)
+	}
+}
+```
+
+问题在以上注释中给与解释。
 
 ## 接口问题
 
@@ -127,3 +155,20 @@ func main() {
 ```
 
 ## 注:从头部添加元素会引起内存的重分配，导致已有元素全部复制一次。因此从头部添加元素的开销要比从尾部添加元素大很多
+
+## 注意：一般情况下，使用 append 函数追加新的元素时，都会用原切片变量接收返回值来获得更新。不然就会出现以下状况，每次的结果都会被下次覆盖掉。
+
+```go
+func AppendDemo() {
+       x := make([]int, 0, 10)
+       x = append(x, 1, 2, 3)
+       y := append(x, 4)
+       z := append(x, 5)
+       fmt.Println(x)
+       fmt.Println(y)
+       fmt.Println(z)
+   }//output
+   [1 2 3]
+   [1 2 3 5]
+   [1 2 3 5]
+```
