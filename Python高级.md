@@ -83,6 +83,59 @@ sorted
 
 # pandas使用
 
+## pandas处理excel
+
+获取excel的所有sheet名称：
+
+```python
+df = pd.read_excel(path, sheetname=None) 
+//这里的df时所有sheet名称的字典，所以需要用for循环一个一个取
+df.keys()
+```
+
+去除或填充nan项：
+
+```python
+data.dropna(how = ‘all’) 
+# 传入这个参数后将只丢弃全为缺失值的那些行
+data.dropna(axis = 1) 
+# 丢弃有缺失值的列
+data.dropna(axis=1,how=“all”) 
+# 丢弃全为缺失值的那些列
+data.dropna(axis=0,subset = [“Age”, “Sex”]) 
+# 丢弃‘Age’和‘Sex’这两列中有缺失值的行
+```
+
+```python
+data.fillna(method = ‘ffill’, axis = 0) 
+# 将通过前向填充 (ffill) 方法用同一列的前一个数作为填充
+data.fillna(method = ‘ffill’, axis = 1)
+# 将通过前向填充 (ffill) 方法用同一行的前一个数作为填充
+data.fillna(method = ‘backfill’, axis = 0)
+# 将通过前向填充 (ffill) 方法用同一列的后一个数作为填充
+data.fillna(method = ‘backfill’, axis = 1) 
+# 将通过前向填充 (ffill) 方法用同一行的后一个数作为填充
+data.interpolate(method = ‘linear’, axis = 0) 
+# 将通过 linear 插值使用同一列的中间值作为填充
+data.interpolate(method = ‘linear’, axis = 1) 
+# 将通过 linear 插值使用同一行的中间值作为填充
+```
+
+去除数据
+
+```python
+drop(labels, axis=0, level=None, inplace=False, errors='raise')
+#axis为0时表示删除行，axis为1时表示删除列。
+#errors='raise'会让程序在labels接收到没有的行名或者列名时抛出错误导致程序停止运行，errors='ignore'会忽略没有的行名或者列名，只对存在的行名或者列名进行操作，没有指定的话也是默认‘errors='raise'’。
+#inplace默认为false，代表是否对原数据生效，boolean类型。
+#level接收int或索引名，代表标签所在级别，默认为none。
+#需要注意一点：在删除过后，索引也就产生了缺失，可以将索引重置-reset_index(drop=True)
+```
+
+
+
+
+
 打开需要处理的文件用read_文件类型的函数：read_csv("test.csv")  
 
 1、**filepath_or_buffer：**数据输入的路径：可以是文件路径、可以是URL，也可以是实现read方法的任意对象(open操作)。
