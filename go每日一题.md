@@ -79,9 +79,45 @@ func Dif_var_make() {
 		fmt.Println(v)
 	}
 }
+
+//下面代码中，x 已声明，y 没有声明，判断每条语句的对错。
+1.x, _ := f()
+2.x, _ = f()
+3.x, y := f()
+4.x, y = f()
+//知识点：变量的声明。
+//1.错，x 已经声明，不能使用 :=；
+//2.对；
+//3.对，当多值赋值时，:= 左边的变量无论声明与否都可以；
+//4.错，y 没有声明。
 ```
 
 问题在以上注释中给与解释。
+
+## 变量和返回值之间的关系
+
+```go
+func increaseA() int {
+	var i int
+	defer func() {
+		i++
+	}()
+	return i
+}
+
+func increaseB() (r int) {
+	defer func() {
+		r++
+	}()
+	return r
+}
+
+func main() {
+	fmt.Println(increaseA())
+	fmt.Println(increaseB())
+}//0 1
+//原因：
+```
 
 ## 接口问题
 
