@@ -2,7 +2,7 @@
 
 一、SSH简介
 
-　　SSH（Secure Shell）属于在传输层上运行的用户层协议，相对于Telnet来说具有更高的安全性。
+　　SSH（Secure Shell）属于在传输层上运行的用户层协议，相对于Telnet来说具有更高的安全性。**首先需要连接的机器上必须有openssh服务。**
 
 二、SSH远程连接
 
@@ -20,4 +20,3 @@ ssh.connect('IP',22,'用户名','密码')
 stdin, stdout, stderr = ssh.exec_command('df')
 ```
 
->>>>>>> 
