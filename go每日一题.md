@@ -242,3 +242,64 @@ func Test1() {
 */
 ```
 
+## go的switch case
+
+fallthrough 语法可以执行满足条件的case的下一个case，是为了兼容C语言中的case设计的。
+
+## goto(跳转到指定标签)
+
+`goto`语句通过标签进行代码间的无条件跳转。`goto`语句可以在快速跳出循环、避免重复退出上有一定的帮助。Go语言中使用`goto`语句能简化一些代码的实现过程。 例如双层嵌套的for循环要退出时：
+
+```go
+func gotoDemo1() {
+	var breakFlag bool
+	for i := 0; i < 10; i++ {
+		for j := 0; j < 10; j++ {
+			if j == 2 {
+				// 设置退出标签
+				breakFlag = true
+				break
+			}
+			fmt.Printf("%v-%v\n", i, j)
+		}
+		// 外层for循环判断
+		if breakFlag {
+			break
+		}
+	}
+}
+```
+
+使用`goto`语句能简化代码：
+
+```go
+func gotoDemo2() {
+	for i := 0; i < 10; i++ {
+		for j := 0; j < 10; j++ {
+			if j == 2 {
+				// 设置退出标签
+				goto breakTag
+			}
+			fmt.Printf("%v-%v\n", i, j)
+		}
+	}
+	return
+	// 标签
+breakTag:
+	fmt.Println("结束for循环")
+}
+```
+
+## 9*9乘法表
+
+```go
+func jiujiu(){
+    for i:=1;i<10;i++{
+        for j:=1;j<=i;j++{
+            fmt.Printf("%v * %v = %2v ",i,j,i*j)
+        }
+    	fmt.Println()
+    }
+}
+```
+
