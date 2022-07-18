@@ -18,13 +18,15 @@ zfill函数可以在输出字符前添加0，达到格式标准。
 
 在调用实例方法时，默认会传输self对象参数，而调用类方法时（@classmethod装饰器），传输的时cls参数。
 
-## 时间日期包使用
+# 时间日期包使用
 
 ## datetime.datetime
 
 获取当前时间 datetime.datetime.now() 注意这个输出的是个datetime.datetime类型数据
 
-时间数据的模板为：%Y-%m-%d %H:%M:%S
+时间数据的模板为：%Y-%m-%d %H:%M:%S 
+
+简写：%Y-%m-%d %X
 
 datetime.datetime类型转换为字符串类型使用：strftime，反向转换使用：strptime，注意这里的参数必须是字符串，需要年月日或者时间的话，用模板进行样式修改。
 
@@ -36,9 +38,22 @@ isoweekday()可以查看日期为星期几(1-7)返回值为int型
 
 isocalendar()可以查看日期为（多少年，多少周，星期几）返回值为元组
 
-## 高阶函数
+# 高阶函数
 
-map
+经典用法：
+
+```python
+# 转置数据矩阵---横纵转换，但必须没行长度一致
+list(map(list, zip(*data)))
+
+#找出两个列表的交集
+x = [1, 2, 3, 5, 6]
+y = [2, 3, 4, 6, 7]
+list(filter(lambda a: a in y, x))
+---->[2, 3, 6]
+```
+
+## map 每次返回的是一个迭代器
 
 - 把集合或者列表里的每一个元素都按照一定规则操作，生产新的列表
   或者集合
@@ -47,14 +62,14 @@ map
 - map类型是一个可迭代的结构，可以使用for循环遍历
   map(func_name， n)
 
-reduce
+## reduce 每次返回的是一个结果
 
 - reduce(function, sequence[, initial])
   function：需要传入一个有两个参数的函数，可以直接使用lambda匿名函数。
   sequence：将会从左往右遍历这个序列。
 - 例子：reduce(lambda x,y: x+y, [1,2,3])，reduce(lambda x,y: x+y, [1,2,3], 100)注意多个参数时，尽量结果的类型和每个参数的类型一致。多个参数时，拼接顺序从后往前
 
-filter
+## filter 每次返回的是一个bool结果
 
 - 过滤函数：filter()函数用于过滤序列，过滤掉不符合条件的元素，返回符合条件的元素组成新列表。
 - filter(function, iterable) function为函数，iterable为序列
@@ -80,6 +95,108 @@ sorted
 **for i in range(len())与len()后在丢入循环range中的效率都是一致的。**
 
 逻辑判断的顺序为NOT-->AND-->OR
+
+# 迭代器和生成器
+
+## yield和return的区别
+
+在一个函数里return只能执行一次，return后的语句均不会执行。
+
+但是yield之后可以保存函数运行状态，下次继续往后执行。
+
+
+
+## 每次生成的生成器都是不同的生成器
+
+```python
+g = countdown(5)
+print(g.__next__()) # 5
+print(g.__next__()) # 4
+print("-- for ---")
+for i in g:
+    print(i) # 3 2 1 发射
+# 调用迭代器的__next__方法，生成器顺序执行
+```
+
+```python
+print(countdown(5).__next()) # 5
+print(countdown(5).__next()) # 5
+print(countdown(5).__next()) # 5
+# 每次输出都是一样，说明每次都是不同的生成器
+```
+
+## random库
+
+关于`random`的一个小练习，写一个生成4位随机验证码（包含数字和字母）的小程序：
+
+```python
+import random
+
+
+def get_code(n):
+    """
+    生成指定位数的随机验证码，包含数字和字母
+    :param n: 随机验证码位数
+    :return:
+    """
+    code = ""
+    for i in range(n):  # 循环n次
+        number = random.randint(0, 9)  # 生成数字
+        letter = chr(random.randint(65, 90))  # 利用chr将数字转成字符
+        aim = random.choice([number, letter])  # 从数字和字符中选一个
+        code += str(aim)  # 将每一次循环得到的结果拼接起来
+    return code
+
+if __name__ == '__main__':
+    ret = get_code(4)
+    print(ret)
+```
+
+## os库
+
+```python
+os.getcwd() 获取当前工作目录，即当前python脚本工作的目录路径
+os.chdir("dirname")  改变当前脚本工作目录；相当于shell下cd
+os.curdir  返回当前目录: ('.')
+os.pardir  获取当前目录的父目录字符串名：('..')
+os.makedirs('dirname1/dirname2')    可生成多层递归目录
+os.removedirs('dirname1')    若目录为空，则删除，并递归到上一级目录，如若也为空，则删除，依此类推
+os.mkdir('dirname')    生成单级目录；相当于shell中mkdir dirname
+os.rmdir('dirname')    删除单级空目录，若目录不为空则无法删除，报错；相当于shell中rmdir dirname
+os.listdir('dirname')    列出指定目录下的所有文件和子目录，包括隐藏文件，并以列表方式打印
+os.remove()  删除一个文件
+os.rename("oldname","newname")  重命名文件/目录
+os.stat('path/filename')  获取文件/目录信息
+os.sep    输出操作系统特定的路径分隔符，win下为"\\",Linux下为"/"
+os.linesep    输出当前平台使用的行终止符，win下为"\t\n",Linux下为"\n"
+os.pathsep    输出用于分割文件路径的字符串 win下为;,Linux下为:
+os.name    输出字符串指示当前使用平台。win->'nt'; Linux->'posix'
+os.system("bash command")  运行shell命令，直接显示
+os.environ  获取系统环境变量
+os.path.abspath(path)  返回path规范化的绝对路径
+os.path.split(path)  将path分割成目录和文件名二元组返回
+os.path.dirname(path)  返回path的目录。其实就是os.path.split(path)的第一个元素
+os.path.basename(path)  返回path最后的文件名。如何path以／或\结尾，那么就会返回空值。即os.path.split(path)的第二个元素
+os.path.exists(path)  如果path存在，返回True；如果path不存在，返回False
+os.path.isabs(path)  如果path是绝对路径，返回True
+os.path.isfile(path)  如果path是一个存在的文件，返回True。否则返回False
+os.path.isdir(path)  如果path是一个存在的目录，则返回True。否则返回False
+os.path.join(path1[, path2[, ...]])  将多个路径组合后返回，第一个绝对路径之前的参数将被忽略
+os.path.getatime(path)  返回path所指向的文件或者目录的最后存取时间
+os.path.getmtime(path)  返回path所指向的文件或者目录的最后修改时间
+os.path.getsize(path) 返回path的大小
+```
+
+## sys库
+
+```python
+sys.argv           命令行参数List，第一个元素是程序本身路径
+sys.exit(n)        退出程序，正常退出时exit(0)
+sys.version        获取Python解释程序的版本信息
+sys.maxint         最大的Int值
+sys.path           返回模块的搜索路径，初始化时使用PYTHONPATH环境变量的值
+sys.platform       返回操作系统平台名称
+```
 
 # pandas使用
 
