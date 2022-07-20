@@ -1,4 +1,4 @@
-go导入自定义包，需要将包先添加进module path中，才能在main中import导入。
+go get 导入自定义包，自动将包先添加进module path中，才能在main中import导入。
 
 ## 被调用的函数的首字母必须为大写！
 
