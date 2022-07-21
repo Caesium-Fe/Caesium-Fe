@@ -80,12 +80,6 @@
 
 
 
-
-
-
-
-
-
 # go defer语句
 
 defer一般用于资源的释放和异常的捕捉，defer后的语句会在程序进行最后的return后再执行。
@@ -121,6 +115,41 @@ if err != nil{
     return
 }
 ```
+
+# go的flag库
+
+
+
+Go语言内置的`flag`包实现了命令行参数的解析，`flag`包使得开发命令行工具更为简单。
+
+## os.Args
+
+如果你只是简单的想要获取命令行参数，可以像下面的代码示例一样使用`os.Args`来获取命令行参数。
+
+```go
+//os.Args demo
+func main() {
+	//os.Args是一个[]string
+	if len(os.Args) > 0 {
+		for index, arg := range os.Args {
+			fmt.Printf("args[%d]=%v\n", index, arg)
+		}
+	}
+}
+```
+
+将上面的代码执行`go build -o "args_demo"`编译之后，执行：
+
+```bash
+$ ./args_demo a b c d
+args[0]=./args_demo
+args[1]=a
+args[2]=b
+args[3]=c
+args[4]=d
+```
+
+`os.Args`是一个存储命令行参数的字符串切片，它的第一个元素是执行文件的名称。
 
 # 异常的捕捉
 

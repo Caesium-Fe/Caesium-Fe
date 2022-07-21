@@ -183,6 +183,24 @@ func main() {
 
 ```
 
+## 实际使用
+
+```go
+// A B处补充完整，让程序正常输出
+type S struct {
+	m string
+}
+
+func f() *S {
+    return __  //A    &S{"foo"}
+}
+
+func main() {
+    p := __    //B    f()或者*f()
+	fmt.Println(p.m) //print "foo"
+}
+```
+
 
 
 ## 切片 a、b、c 的长度和容量分别是多少？
@@ -190,9 +208,9 @@ func main() {
 ```go
 func main() {
 	s := [3]int{1, 2, 3}
-	a := s[:0]
-	b := s[:2]
-	c := s[1:2:cap(s)]
+	a := s[:0] //[]
+	b := s[:2] //[1,2]
+	c := s[1:2:cap(s)] //[2]
 }
 ```
 
@@ -202,7 +220,100 @@ func main() {
 
 知识点：数组或切片的截取操作。截取操作有带 2 个或者 3 个参数，形如：[i:j] 和 [i:j:k]，假设截取对象的底层数组长度为 l。在操作符 [i:j] 中，如果 i 省略，默认 0，如果 j 省略，默认底层数组的长度，截取得到的**切片长度和容量计算方法是 j-i、l-i**。操作符 [i:j:k]，k 主要是用来限制切片的容量，但是不能大于数组的长度 l，截取得到的**切片长度和容量计算方法是 j-i、k-i**。同python的切片一致，只是多了个容量的概念。
 
+### 切片的本质
+
+切片的本质就是对底层数组的封装，它包含了三个信息：底层数组的指针、切片的长度（len）和切片的容量（cap）。
+
+举个例子，现在有一个数组`a := [8]int{0, 1, 2, 3, 4, 5, 6, 7}`，切片`s1 := a[:5]`，相应示意图如下。
+
+![slice_01](E:\markdownInJob\typora-user-images\slice_01.png)
+
+切片`s2 := a[3:6]`，相应示意图如下：
+
+![slice_02](E:\markdownInJob\typora-user-images\slice_02.png)
+
 ## 切片扩容-append 函数
+
+Go语言的内建函数`append()`可以为切片动态添加元素。 可以一次添加一个元素，可以添加多个元素，也可以添加另一个切片中的元素（后面加…）。
+
+```go
+func main(){
+	var s []int
+	s = append(s, 1)        // [1]
+	s = append(s, 2, 3, 4)  // [1 2 3 4]
+	s2 := []int{5, 6, 7}  
+	s = append(s, s2...)    // [1 2 3 4 5 6 7]
+}
+```
+
+**注意：**通过var声明的零值切片可以在`append()`函数直接使用，无需初始化。
+
+```go
+var s []int
+s = append(s, 1, 2, 3)
+```
+
+没有必要像下面的代码一样初始化一个切片再传入`append()`函数使用，
+
+```go
+s := []int{}  // 没有必要初始化
+s = append(s, 1, 2, 3)
+
+var s = make([]int)  // 没有必要初始化
+s = append(s, 1, 2, 3)
+```
+
+每个切片会指向一个底层数组，这个数组的容量够用就添加新增元素。当底层数组不能容纳新增的元素时，切片就会自动按照一定的策略进行“扩容”，此时该切片指向的底层数组就会更换。“扩容”操作往往发生在`append()`函数调用时，所以我们通常都需要用原变量接收append函数的返回值。
+
+举个例子：
+
+```go
+func main() {
+	//append()添加元素和切片扩容
+	var numSlice []int
+	for i := 0; i < 10; i++ {
+		numSlice = append(numSlice, i)
+		fmt.Printf("%v  len:%d  cap:%d  ptr:%p\n", numSlice, len(numSlice), cap(numSlice), numSlice)
+	}
+}
+//输出：
+[0]  len:1  cap:1  ptr:0xc0000a8000
+[0 1]  len:2  cap:2  ptr:0xc0000a8040
+[0 1 2]  len:3  cap:4  ptr:0xc0000b2020
+[0 1 2 3]  len:4  cap:4  ptr:0xc0000b2020
+[0 1 2 3 4]  len:5  cap:8  ptr:0xc0000b6000
+[0 1 2 3 4 5]  len:6  cap:8  ptr:0xc0000b6000
+[0 1 2 3 4 5 6]  len:7  cap:8  ptr:0xc0000b6000
+[0 1 2 3 4 5 6 7]  len:8  cap:8  ptr:0xc0000b6000
+[0 1 2 3 4 5 6 7 8]  len:9  cap:16  ptr:0xc0000b8000
+[0 1 2 3 4 5 6 7 8 9]  len:10  cap:16  ptr:0xc0000b8000
+```
+
+从上面的结果可以看出：
+
+1. `append()`函数将元素追加到切片的最后并返回该切片。
+2. 切片numSlice的容量按照1，2，4，8，16这样的规则自动进行扩容，每次扩容后都是扩容前的2倍。
+
+append()函数还支持一次性追加多个元素。 例如：
+
+```go
+var citySlice []string
+// 追加一个元素
+citySlice = append(citySlice, "北京")
+// 追加多个元素
+citySlice = append(citySlice, "上海", "广州", "深圳")
+// 追加切片
+a := []string{"成都", "重庆"}
+citySlice = append(citySlice, a...)// 注意追加切片时后面要加...
+fmt.Println(citySlice) //[北京 上海 广州 深圳 成都 重庆]
+```
+
+## 切片的扩容策略
+
+- 首先判断，如果新申请容量（cap）大于2倍的旧容量（old.cap），最终容量（newcap）就是新申请的容量（cap）。
+- 否则判断，如果旧切片的长度小于1024，则最终容量(newcap)就是旧容量(old.cap)的两倍，即（newcap=doublecap），
+- 否则判断，如果旧切片长度大于等于1024，则最终容量（newcap）从旧容量（old.cap）开始循环增加原来的1/4，即（newcap=old.cap,for {newcap += newcap/4}）直到最终容量（newcap）大于等于新申请的容量(cap)，即（newcap >= cap）
+- 如果最终容量（cap）计算值溢出，则最终容量（cap）就是新申请容量（cap）。
 
 ## 追加元素
 
@@ -240,6 +351,59 @@ func AppendDemo() {
    [1 2 3 5]
    [1 2 3 5]
 ```
+
+## 使用copy()函数复制切片
+
+由于切片是引用类型，所以a和b其实都指向了同一块内存地址。修改b的同时a的值也会发生变化。
+
+Go语言内建的`copy()`函数可以迅速地将一个切片的数据复制到另外一个切片空间中，`copy()`函数的使用格式如下：
+
+```bash
+copy(destSlice, srcSlice []T)
+```
+
+其中：
+
+- srcSlice: 数据来源切片
+- destSlice: 目标切片
+
+举个例子：
+
+```go
+func main() {
+	// copy()复制切片
+	a := []int{1, 2, 3, 4, 5}
+	c := make([]int, 5, 5)
+	copy(c, a)     //使用copy()函数将切片a中的元素复制到切片c
+	fmt.Println(a) //[1 2 3 4 5]
+	fmt.Println(c) //[1 2 3 4 5]
+	c[0] = 1000
+	fmt.Println(a) //[1 2 3 4 5]
+	fmt.Println(c) //[1000 2 3 4 5]
+}
+```
+
+## 从切片中删除元素
+
+Go语言中并没有删除切片元素的专用方法，我们可以使用切片本身的特性来删除元素。 代码如下：
+
+```go
+func main() {
+	// 从切片中删除元素
+	a := []int{30, 31, 32, 33, 34, 35, 36, 37}
+	// 要删除索引为2的元素
+	a = append(a[:2], a[3:]...)
+	fmt.Println(a) //[30 31 33 34 35 36 37]
+}
+```
+
+总结一下就是：要从切片a中删除索引为`index`的元素，操作方法是
+
+```go
+a = append(a[:index], a[index+1:]...)
+```
+
+
 
 ## defer输出顺序
 
