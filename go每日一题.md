@@ -59,6 +59,8 @@ aa := fmt.Sprintf("%f",varsa) // 转换为字符串
 var3, error3 := strconv.ParseFloat(aa, 32) // 字符串转值类型
 ```
 
+不同的类型之间不能进行运算，所以运算前需要将变量的类型统一。
+
 ## 变量声明与赋值问题
 
 ```go

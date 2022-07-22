@@ -151,6 +151,425 @@ args[4]=d
 
 `os.Args`是一个存储命令行参数的字符串切片，它的第一个元素是执行文件的名称。
 
+## 定义命令行flag参数
+
+有以下两种常用的定义命令行`flag`参数的方法。
+
+### flag.Type()
+
+基本格式如下：
+
+`flag.Type(flag名, 默认值, 帮助信息)*Type` 例如我们要定义姓名、年龄、婚否三个命令行参数，我们可以按如下方式定义：
+
+```go
+name := flag.String("name", "张三", "姓名")
+age := flag.Int("age", 18, "年龄")
+married := flag.Bool("married", false, "婚否")
+delay := flag.Duration("d", 0, "时间间隔")
+```
+
+需要注意的是，此时`name`、`age`、`married`、`delay`均为对应类型的指针。
+
+### flag.TypeVar()
+
+基本格式如下： `flag.TypeVar(Type指针, flag名, 默认值, 帮助信息)` 例如我们要定义姓名、年龄、婚否三个命令行参数，我们可以按如下方式定义：
+
+```go
+var name string
+var age int
+var married bool
+var delay time.Duration
+flag.StringVar(&name, "name", "张三", "姓名")
+flag.IntVar(&age, "age", 18, "年龄")
+flag.BoolVar(&married, "married", false, "婚否")
+flag.DurationVar(&delay, "d", 0, "时间间隔")
+```
+
+## flag.Parse()
+
+通过以上两种方法定义好命令行flag参数后，需要通过调用`flag.Parse()`来对命令行参数进行解析。
+
+支持的命令行参数格式有以下几种：
+
+- `-flag xxx` （使用空格，一个`-`符号）
+- `--flag xxx` （使用空格，两个`-`符号）
+- `-flag=xxx` （使用等号，一个`-`符号）
+- `--flag=xxx` （使用等号，两个`-`符号）
+
+其中，布尔类型的参数必须使用等号的方式指定。
+
+Flag解析在第一个非flag参数（单个”-“不是flag参数）之前停止，或者在终止符”–“之后停止。
+
+## flag其他函数
+
+```go
+flag.Args()  ////返回命令行参数后的其他参数，以[]string类型
+flag.NArg()  //返回命令行参数后的其他参数个数
+flag.NFlag() //返回使用的命令行参数个数
+```
+
+## 完整示例
+
+### 定义
+
+```go
+func main() {
+	//定义命令行参数方式1
+	var name string
+	var age int
+	var married bool
+	var delay time.Duration
+	flag.StringVar(&name, "name", "张三", "姓名")
+	flag.IntVar(&age, "age", 18, "年龄")
+	flag.BoolVar(&married, "married", false, "婚否")
+	flag.DurationVar(&delay, "d", 0, "延迟的时间间隔")
+
+	//解析命令行参数
+	flag.Parse()
+	fmt.Println(name, age, married, delay)
+	//返回命令行参数后的其他参数
+	fmt.Println(flag.Args())
+	//返回命令行参数后的其他参数个数
+	fmt.Println(flag.NArg())
+	//返回使用的命令行参数个数
+	fmt.Println(flag.NFlag())
+}
+```
+
+### 使用
+
+命令行参数使用提示：
+
+```bash
+$ ./flag_demo -help
+Usage of ./flag_demo:
+  -age int
+        年龄 (default 18)
+  -d duration
+        时间间隔
+  -married
+        婚否
+  -name string
+        姓名 (default "张三")
+```
+
+正常使用命令行flag参数：
+
+```bash
+$ ./flag_demo -name 沙河娜扎 --age 28 -married=false -d=1h30m
+沙河娜扎 28 false 1h30m0s
+[]
+0
+4
+```
+
+使用非flag命令行参数：
+
+```bash
+$ ./flag_demo a b c
+张三 18 false 0s
+[a b c]
+3
+0
+```
+
+## go的log库
+
+## 使用Logger
+
+log包定义了Logger类型，该类型提供了一些格式化输出的方法。本包也提供了一个预定义的“标准”logger，可以通过调用函数`Print系列`(Print|Printf|Println）、`Fatal系列`（Fatal|Fatalf|Fatalln）、和`Panic系列`（Panic|Panicf|Panicln）来使用，比自行创建一个logger对象更容易使用。
+
+例如，我们可以像下面的代码一样直接通过`log`包来调用上面提到的方法，默认它们会将日志信息打印到终端界面：
+
+```go
+package main
+import ("log")
+func main() {
+	log.Println("这是一条很普通的日志。")
+	v := "很普通的"
+	log.Printf("这是一条%s日志。\n", v)
+	log.Fatalln("这是一条会触发fatal的日志。")
+	log.Panicln("这是一条会触发panic的日志。")
+}
+2017/06/19 14:04:17 这是一条很普通的日志。
+2017/06/19 14:04:17 这是一条很普通的日志。
+2017/06/19 14:04:17 这是一条会触发fatal的日志。
+```
+
+logger会打印每条日志信息的日期、时间，默认输出到系统的标准错误。Fatal系列函数会在写入日志信息后调用os.Exit(1)。Panic系列函数会在写入日志信息后panic。
+
+## 配置logger
+
+`log`标准库中的`Flags`函数会返回标准logger的输出配置，而`SetFlags`函数用来设置标准logger的输出配置。
+
+### flag选项
+
+`log`标准库提供了如下的flag选项，它们是一系列定义好的常量。
+
+```go
+const (
+    // 控制输出日志信息的细节，不能控制输出的顺序和格式。
+    // 输出的日志在每一项后会有一个冒号分隔：例如2009/01/23 01:23:23.123123 /a/b/c/d.go:23: message
+    Ldate         = 1 << iota     // 日期：2009/01/23
+    Ltime                         // 时间：01:23:23
+    Lmicroseconds                 // 微秒级别的时间：01:23:23.123123（用于增强Ltime位）
+    Llongfile                     // 文件全路径名+行号： /a/b/c/d.go:23
+    Lshortfile                    // 文件名+行号：d.go:23（会覆盖掉Llongfile）
+    LUTC                          // 使用UTC时间
+    LstdFlags     = Ldate | Ltime // 标准logger的初始值
+)
+```
+
+下面我们在记录日志之前先设置一下标准logger的输出选项如下：
+
+```go
+func main() {
+	log.SetFlags(log.Llongfile | log.Lmicroseconds | log.Ldate)
+	log.Println("这是一条很普通的日志。")
+}
+```
+
+编译执行后得到的输出结果如下：
+
+```go
+2017/06/19 14:05:17.494943 .../log_demo/main.go:11: 这是一条很普通的日志。
+```
+
+### 配置日志前缀
+
+`log`标准库中还提供了关于日志信息前缀的两个方法：
+
+```go
+func Prefix() string
+func SetPrefix(prefix string)
+```
+
+其中`Prefix`函数用来查看标准logger的输出前缀，`SetPrefix`函数用来设置输出前缀。
+
+```go
+func main() {
+	log.SetFlags(log.Llongfile | log.Lmicroseconds | log.Ldate)
+	log.Println("这是一条很普通的日志。")
+	log.SetPrefix("[小王子]")
+	log.Println("这是一条很普通的日志。")
+}
+```
+
+上面的代码输出如下：
+
+```bash
+[小王子]2017/06/19 14:05:57.940542 .../log_demo/main.go:13: 这是一条很普通的日志。
+```
+
+这样我们就能够在代码中为我们的日志信息添加指定的前缀，方便之后对日志信息进行检索和处理。
+
+### 配置日志输出位置
+
+```go
+func SetOutput(w io.Writer)
+```
+
+`SetOutput`函数用来设置标准logger的输出目的地，默认是标准错误输出。
+
+例如，下面的代码会把日志输出到同目录下的`xx.log`文件中。
+
+```go
+func main() {
+	logFile, err := os.OpenFile("./xx.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		fmt.Println("open log file failed, err:", err)
+		return
+	}
+	log.SetOutput(logFile)
+	log.SetFlags(log.Llongfile | log.Lmicroseconds | log.Ldate)
+	log.Println("这是一条很普通的日志。")
+	log.SetPrefix("[小王子]")
+	log.Println("这是一条很普通的日志。")
+}
+```
+
+如果你要使用标准的logger，我们通常会把上面的配置操作写到`init`函数中。
+
+```go
+func init() {
+	logFile, err := os.OpenFile("./xx.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		fmt.Println("open log file failed, err:", err)
+		return
+	}
+	log.SetOutput(logFile)
+	log.SetFlags(log.Llongfile | log.Lmicroseconds | log.Ldate)
+}
+```
+
+## 创建logger
+
+`log`标准库中还提供了一个创建新logger对象的构造函数–`New`，支持我们创建自己的logger示例。`New`函数的签名如下：
+
+```go
+func New(out io.Writer, prefix string, flag int) *Logger
+```
+
+New创建一个Logger对象。其中，参数out设置日志信息写入的目的地。参数prefix会添加到生成的每一条日志前面。参数flag定义日志的属性（时间、文件等等）。
+
+举个例子：
+
+```go
+func main() {
+	logger := log.New(os.Stdout, "<New>", log.Lshortfile|log.Ldate|log.Ltime)
+	logger.Println("这是自定义的logger记录的日志。")
+}
+```
+
+将上面的代码编译执行之后，得到结果如下：
+
+```bash
+<New>2017/06/19 14:06:51 main.go:34: 这是自定义的logger记录的日志。
+```
+
+## 总结
+
+Go内置的log库功能有限，例如无法满足记录不同级别日志的情况，我们在实际的项目中根据自己的需要选择使用第三方的日志库，如[logrus](https://github.com/sirupsen/logrus)、[zap](https://github.com/uber-go/zap)等。
+
+# go的json序列化问题
+
+Go语言中的json包在序列化空接口存放的数字类型（整型、浮点型等）都序列化成float64类型。
+
+我们构造一个结构体如下：
+
+```go
+type s struct {
+	data map[string]interface{}
+}
+```
+
+## json序列化的问题
+
+```go
+func jsonDemo() {
+	var s1 = s{
+		data: make(map[string]interface{}, 8),
+	}
+	s1.data["count"] = 1
+	ret, err := json.Marshal(s1.data)
+	if err != nil {
+		fmt.Println("marshal failed", err)
+	}
+	fmt.Printf("%#v\n", string(ret))
+	var s2 = s{
+		data: make(map[string]interface{}, 8),
+	}
+	err = json.Unmarshal(ret, &s2.data)
+	if err != nil {
+		fmt.Println("unmarshal failed", err)
+	}
+	fmt.Println(s2)
+	for _, v := range s2.data {
+		fmt.Printf("value:%v, type:%T\n", v, v)
+	}
+}
+```
+
+输出结果：
+
+```bash
+"{\"count\":1}"
+{map[count:1]}
+value:1, type:float64
+```
+
+## gob序列化示例
+
+标准库gob是golang提供的“私有”的编解码方式，它的效率会比json，xml等更高，特别适合在Go语言程序间传递数据。
+
+```go
+func gobDemo() {
+	var s1 = s{
+		data: make(map[string]interface{}, 8),
+	}
+	s1.data["count"] = 1
+	// encode
+	buf := new(bytes.Buffer)
+	enc := gob.NewEncoder(buf)
+	err := enc.Encode(s1.data)
+	if err != nil {
+		fmt.Println("gob encode failed, err:", err)
+		return
+	}
+	b := buf.Bytes()
+	fmt.Println(b)
+	var s2 = s{
+		data: make(map[string]interface{}, 8),
+	}
+	// decode
+	dec := gob.NewDecoder(bytes.NewBuffer(b))
+	err = dec.Decode(&s2.data)
+	if err != nil {
+		fmt.Println("gob decode failed, err", err)
+		return
+	}
+	fmt.Println(s2.data)
+	for _, v := range s2.data {
+		fmt.Printf("value:%v, type:%T\n", v, v)
+	}
+}
+```
+
+## msgpack
+
+[MessagePack](https://msgpack.org/)是一种高效的二进制序列化格式。它允许你在多种语言(如JSON)之间交换数据。但它更快更小。
+
+### 安装
+
+```bash
+go get -u github.com/vmihailenco/msgpack
+```
+
+### 示例
+
+```go
+package main
+
+import (
+	"fmt"
+
+	"github.com/vmihailenco/msgpack"
+)
+
+// msgpack demo
+
+type Person struct {
+	Name   string
+	Age    int
+	Gender string
+}
+
+func main() {
+	p1 := Person{
+		Name:   "沙河娜扎",
+		Age:    18,
+		Gender: "男",
+	}
+	// marshal
+	b, err := msgpack.Marshal(p1)
+	if err != nil {
+		fmt.Printf("msgpack marshal failed,err:%v", err)
+		return
+	}
+
+	// unmarshal
+	var p2 Person
+	err = msgpack.Unmarshal(b, &p2)
+	if err != nil {
+		fmt.Printf("msgpack unmarshal failed,err:%v", err)
+		return
+	}
+	fmt.Printf("p2:%#v\n", p2) // p2:main.Person{Name:"沙河娜扎", Age:18, Gender:"男"}
+}
+```
+
+
+
 # 异常的捕捉
 
 go 并没有 try...catch模块，那是怎么进行异常捕捉和处理的呢？

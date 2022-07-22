@@ -2,7 +2,7 @@
 
 ## Centos下配置docker
 
-```shell
+```bash
 -----用于centos6.x版本系统
 #如果内核版本过低，则更新
 yum update -y
@@ -42,7 +42,7 @@ docker version
 
 ## 使用docker实现web容器
 
-```shell
+```bash
 #搜索nginx镜像
 docker search nginx
 #从docker仓库中下载nginx镜像（下载对应名称）
@@ -77,7 +77,7 @@ docker rm -f 需要移除的容器id
 
 ## 配置nginx负载均衡tomacat服务器
 
-```powershell
+```bash
 #首先进入到nginx容器中,id是容器进程id
 docker exec -it id /bin/bash
 #直接在当前容器目录里搜索配置文件
