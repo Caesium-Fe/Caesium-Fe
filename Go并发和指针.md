@@ -106,3 +106,34 @@ ptr := &v    // v的类型为T
 - v:代表被取地址的变量，类型为`T`
 - ptr:用于接收地址的变量，ptr的类型就为`*T`，称做T的指针类型。*代表指针。
 
+## new和make
+
+指针类型变量在使用赋值前需要先分配内存，如果只是声明而没有进行分配内存，会引起程序panic，如下例子：
+
+```go
+func main() {
+	var a *int
+	*a = 100  // 这句会造成程序panic
+	fmt.Println(*a)
+
+	var b map[string]int
+	b["沙河娜扎"] = 100
+	fmt.Println(b)
+}
+```
+
+所以这时需要使用new或make来声明了。
+
+
+
+```go
+//评论区的小插曲
+func main(){	
+	e := 10
+	b := &e
+	fmt.Printf("e:%d prt:%d \n", e, &e)
+	fmt.Printf("b:%p type:%T \n", b, b)
+	fmt.Println(&b)//这里看到的是变量b的内存地址，而不是b里存的地址
+	fmt.Println(&e)
+}
+```
