@@ -20,10 +20,6 @@ Go 语言支持并发，我们只需要通过 go 关键字来开启 goroutine �
 		  v := <-ch  // 从 ch 接收数据
 					 // 并把值赋给 v
 
-
-
-
-
 **底层结构:**
 
 ```go
@@ -124,7 +120,54 @@ func main() {
 
 所以这时需要使用new或make来声明了。
 
+## NEW
 
+new函数不太常用，使用new函数得到的是一个类型的指针，并且该指针对应的值为该类型的零值。举个例子：
+
+```go
+func main() {
+	a := new(int)
+	b := new(bool)
+	fmt.Printf("%T\n", a) // *int
+	fmt.Printf("%T\n", b) // *bool
+	fmt.Println(*a)       // 0
+	fmt.Println(*b)       // false
+}	
+```
+
+上述案例中的改写方法为：
+
+```go
+func main() {
+	var a *int
+	a = new(int)
+	*a = 10
+	fmt.Println(*a)
+}
+```
+
+## make
+
+make也是用于内存分配的，区别于new，它只用于slice、map以及chan的内存创建，而且它返回的类型就是这三个类型本身，而不是他们的指针类型，因为这三种类型就是引用类型，所以就没有必要返回他们的指针了。
+
+make函数是无可替代的，我们在使用slice、map以及channel的时候，都需要使用make进行初始化，然后才可以对它们进行操作。
+
+上述案例中的改写方法为：
+
+```go
+func main() {
+	var b map[string]int
+	b = make(map[string]int, 10)
+	b["沙河娜扎"] = 100
+	fmt.Println(b)
+}
+```
+
+### new与make的区别
+
+1. 二者都是用来做内存分配的。
+2. make只用于slice、map以及channel的初始化，返回的还是这三个引用类型本身；
+3. 而new用于类型的内存分配，并且内存对应的值为类型零值，返回的是指向类型的指针。
 
 ```go
 //评论区的小插曲
@@ -135,5 +178,187 @@ func main(){
 	fmt.Printf("b:%p type:%T \n", b, b)
 	fmt.Println(&b)//这里看到的是变量b的内存地址，而不是b里存的地址
 	fmt.Println(&e)
+}
+```
+
+# map
+
+map是一种无序的基于`key-value`的数据结构，Go语言中的map是引用类型，必须初始化才能使用。
+
+## map定义
+
+Go语言中 `map`的定义语法如下：
+
+```go
+map[KeyType]ValueType
+```
+
+其中，
+
+- KeyType:表示键的类型。
+- ValueType:表示键对应的值的类型。
+
+map类型的变量默认初始值为nil，需要使用make()函数来分配内存。语法为：
+
+```go
+make(map[KeyType]ValueType, [cap])
+```
+
+其中cap表示map的容量，该参数虽然不是必须的，但是我们应该在初始化map的时候就为其指定一个合适的容量。
+
+## map基本使用
+
+map中的数据都是成对出现的，map的基本使用示例代码如下：
+
+```go
+func main() {
+	scoreMap := make(map[string]int, 8)
+	scoreMap["张三"] = 90
+	scoreMap["小明"] = 100
+	fmt.Println(scoreMap)
+	fmt.Println(scoreMap["小明"])
+	fmt.Printf("type of a:%T\n", scoreMap)
+}
+```
+
+输出：
+
+```bash
+map[小明:100 张三:90]
+100
+type of a:map[string]int
+```
+
+map也支持在声明的时候填充元素，例如：
+
+```go
+func main() {
+	userInfo := map[string]string{
+		"username": "武汉小王子",
+		"password": "123456",
+	}
+	fmt.Println(userInfo) //
+}
+```
+
+## 判断某个键是否存在
+
+Go语言中有个判断map中键是否存在的特殊写法，格式如下:
+
+```go
+value, ok := map[key]
+```
+
+## map的遍历
+
+Go语言中使用`for range`遍历map。
+
+```go
+func main() {
+	scoreMap := make(map[string]int)
+	scoreMap["张三"] = 90
+	scoreMap["小明"] = 100
+	scoreMap["娜扎"] = 60
+	for k, v := range scoreMap {
+		fmt.Println(k, v)
+	}
+}
+```
+
+但我们只想遍历key的时候，可以按下面的写法：
+
+```go
+func main() {
+	scoreMap := make(map[string]int)
+	scoreMap["张三"] = 90
+	scoreMap["小明"] = 100
+	scoreMap["娜扎"] = 60
+	for k := range scoreMap {
+		fmt.Println(k)
+	}
+}
+```
+
+**注意：** 遍历map时的元素顺序与添加键值对的顺序无关。
+
+## 使用delete()函数删除键值对
+
+使用`delete()`内建函数从map中删除一组键值对，`delete()`函数的格式如下：
+
+```go
+delete(map, key)
+```
+
+其中，
+
+- map:表示要删除键值对的map
+- key:表示要删除的键值对的键
+
+## 按照指定顺序遍历map
+
+```go
+func main() {
+	rand.Seed(time.Now().UnixNano()) //初始化随机数种子
+
+	var scoreMap = make(map[string]int, 200)
+
+	for i := 0; i < 100; i++ {
+		key := fmt.Sprintf("stu%02d", i) //生成stu开头的字符串
+		value := rand.Intn(100)          //生成0~99的随机整数
+		scoreMap[key] = value
+	}
+	//取出map中的所有key存入切片keys
+	var keys = make([]string, 0, 200)
+	for key := range scoreMap {
+		keys = append(keys, key)
+	}
+	//对切片进行排序
+	sort.Strings(keys)
+	//按照排序后的key遍历map
+	for _, key := range keys {
+		fmt.Println(key, scoreMap[key])
+	}
+}
+```
+
+## 元素为map类型的切片
+
+下面的代码演示了切片中的元素为map类型时的操作：
+
+```go
+func main() {
+	var mapSlice = make([]map[string]string, 3)
+	for index, value := range mapSlice {
+		fmt.Printf("index:%d value:%v\n", index, value)
+	}
+	fmt.Println("after init")
+	// 对切片中的map元素进行初始化
+	mapSlice[0] = make(map[string]string, 10)
+	mapSlice[0]["name"] = "小王子"
+	mapSlice[0]["password"] = "123456"
+	mapSlice[0]["address"] = "武汉"
+	for index, value := range mapSlice {
+		fmt.Printf("index:%d value:%v\n", index, value)
+	}
+}
+```
+
+## 值为切片类型的map
+
+下面的代码演示了map中值为切片类型的操作：
+
+```go
+func main() {
+	var sliceMap = make(map[string][]string, 3)
+	fmt.Println(sliceMap)
+	fmt.Println("after init")
+	key := "中国"
+	value, ok := sliceMap[key]
+	if !ok {
+		value = make([]string, 0, 2)
+	}
+	value = append(value, "北京", "上海")
+	sliceMap[key] = value
+	fmt.Println(sliceMap)
 }
 ```
