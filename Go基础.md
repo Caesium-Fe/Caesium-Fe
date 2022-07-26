@@ -526,3 +526,373 @@ func someFunc(x string) []int {
 	...
 }
 ```
+
+# 函数进阶
+
+## 变量作用域
+
+### 全局变量
+
+全局变量是定义在函数外部的变量，它在程序整个运行周期内都有效。 在函数中可以访问到全局变量。
+
+### 局部变量
+
+局部变量又分为两种： 函数内定义的变量无法在该函数外使用。
+
+**如果局部变量和全局变量重名，优先访问局部变量。**
+
+还有我们之前讲过的for循环语句中定义的变量，也是只在for语句块中生效。
+
+## 函数类型与变量
+
+### 定义函数类型
+
+我们可以使用`type`关键字来定义一个函数类型，具体格式如下：
+
+```go
+type calculation func(int, int) int
+```
+
+上面语句定义了一个`calculation`类型，它是一种函数类型，这种函数接收两个int类型的参数并且返回一个int类型的返回值。
+
+简单来说，凡是满足这个条件的函数都是calculation类型的函数，例如下面的add和sub是calculation类型。
+
+```go
+func add(x, y int) int {
+	return x + y
+}
+
+func sub(x, y int) int {
+	return x - y
+}
+```
+
+add和sub都能赋值给calculation类型的变量。
+
+```go
+var c calculation
+c = add
+```
+
+### 函数类型变量
+
+我们可以声明函数类型的变量并且为该变量赋值：
+
+```go
+func main() {
+	var c calculation               // 声明一个calculation类型的变量c
+	c = add                         // 把add赋值给c
+	fmt.Printf("type of c:%T\n", c) // type of c:main.calculation
+	fmt.Println(c(1, 2))            // 像调用add一样调用c
+
+	f := add                        // 将函数add赋值给变量f1
+	fmt.Printf("type of f:%T\n", f) // type of f:func(int, int) int
+	fmt.Println(f(10, 20))          // 像调用add一样调用f
+}
+```
+
+## 高阶函数
+
+高阶函数分为函数作为参数和函数作为返回值两部分。
+
+### 函数作为参数
+
+函数可以作为参数：
+
+```go
+func add(x, y int) int {
+	return x + y
+}
+func calc(x, y int, op func(int, int) int) int {
+	return op(x, y)
+}
+func main() {
+	ret2 := calc(10, 20, add)
+	fmt.Println(ret2) //30
+}
+```
+
+### 函数作为返回值
+
+函数也可以作为返回值：
+
+```go
+func main() {
+	var c calculation               // 声明一个calculation类型的变量c
+	c = add                         // 把add赋值给c
+	fmt.Printf("type of c:%T\n", c) // type of c:main.calculation
+	fmt.Println(c(1, 2))            // 像调用add一样调用c
+
+	f := add                        // 将函数add赋值给变量f1
+	fmt.Printf("type of f:%T\n", f) // type of f:func(int, int) int
+	fmt.Println(f(10, 20))          // 像调用add一样调用f
+}
+```
+
+## 高阶函数
+
+高阶函数分为函数作为参数和函数作为返回值两部分。
+
+### 函数作为参数
+
+函数可以作为参数：
+
+```go
+func add(x, y int) int {
+	return x + y
+}
+func calc(x, y int, op func(int, int) int) int {
+	return op(x, y)
+}
+func main() {
+	ret2 := calc(10, 20, add)
+	fmt.Println(ret2) //30
+}
+```
+
+### 函数作为返回值
+
+函数也可以作为返回值：
+
+```go
+func do(s string) (func(int, int) int, error) {
+	switch s {
+	case "+":
+		return add, nil
+	case "-":
+		return sub, nil
+	default:
+		err := errors.New("无法识别的操作符")
+		return nil, err
+	}
+}
+```
+
+## 匿名函数和闭包
+
+### 匿名函数
+
+函数当然还可以作为返回值，但是在Go语言中函数内部不能再像之前那样定义函数了，只能定义匿名函数。匿名函数就是没有函数名的函数，匿名函数的定义格式如下：
+
+```go
+func(参数)(返回值){
+    函数体
+}
+```
+
+匿名函数因为没有函数名，所以没办法像普通函数那样调用，所以匿名函数需要保存到某个变量或者作为立即执行函数:
+
+```go
+func main() {
+	// 将匿名函数保存到变量
+	add := func(x, y int) {
+		fmt.Println(x + y)
+	}
+	add(10, 20) // 通过变量调用匿名函数
+
+	//自执行函数：匿名函数定义完加()直接执行
+	func(x, y int) {
+		fmt.Println(x + y)
+	}(10, 20)
+}
+```
+
+匿名函数多用于实现回调函数和闭包。
+
+### 闭包
+
+闭包指的是一个函数和与其相关的引用环境组合而成的实体。简单来说，`闭包=函数+引用环境`。 首先我们来看一个例子：
+
+```go
+func adder() func(int) int {
+	var x int
+	return func(y int) int {
+		x += y
+		return x
+	}
+}
+func main() {
+	var f = adder()
+	fmt.Println(f(10)) //10
+	fmt.Println(f(20)) //30
+	fmt.Println(f(30)) //60
+
+	f1 := adder()
+	fmt.Println(f1(40)) //40
+	fmt.Println(f1(50)) //90
+}
+```
+
+变量`f`是一个函数并且它引用了其外部作用域中的`x`变量，此时`f`就是一个闭包。 在`f`的生命周期内，变量`x`也一直有效。 闭包进阶示例1：
+
+```go
+func adder2(x int) func(int) int {
+	return func(y int) int {
+		x += y
+		return x
+	}
+}
+func main() {
+	var f = adder2(10)
+	fmt.Println(f(10)) //20
+	fmt.Println(f(20)) //40
+	fmt.Println(f(30)) //70
+
+	f1 := adder2(20)
+	fmt.Println(f1(40)) //60
+	fmt.Println(f1(50)) //110
+}
+```
+
+闭包进阶示例2：
+
+```go
+func makeSuffixFunc(suffix string) func(string) string {
+	return func(name string) string {
+		if !strings.HasSuffix(name, suffix) {
+			return name + suffix
+		}
+		return name
+	}
+}
+
+func main() {
+	jpgFunc := makeSuffixFunc(".jpg")
+	txtFunc := makeSuffixFunc(".txt")
+	fmt.Println(jpgFunc("test")) //test.jpg
+	fmt.Println(txtFunc("test")) //test.txt
+}
+```
+
+闭包进阶示例3：
+
+```go
+func calc(base int) (func(int) int, func(int) int) {
+	add := func(i int) int {
+		base += i
+		return base
+	}
+
+	sub := func(i int) int {
+		base -= i
+		return base
+	}
+	return add, sub
+}
+
+func main() {
+	f1, f2 := calc(10)
+	fmt.Println(f1(1), f2(2)) //11 9
+	fmt.Println(f1(3), f2(4)) //12 8
+	fmt.Println(f1(5), f2(6)) //13 7
+}
+```
+
+闭包其实并不复杂，只要牢记  闭包=函数+引用环境。
+
+# 内置函数介绍
+
+|    内置函数    |                             介绍                             |
+| :------------: | :----------------------------------------------------------: |
+|     close      |                     主要用来关闭channel                      |
+|      len       |      用来求长度，比如string、array、slice、map、channel      |
+|      new       | 用来分配内存，主要用来分配值类型，比如int、struct。返回的是指针 |
+|      make      |   用来分配内存，主要用来分配引用类型，比如chan、map、slice   |
+|     append     |                 用来追加元素到数组、slice中                  |
+| panic和recover |                        用来做错误处理                        |
+
+## panic/recover
+
+Go语言中目前（Go1.12）是没有异常机制，但是使用`panic/recover`模式来处理错误。 `panic`可以在任何地方引发，但`recover`只有在`defer`调用的函数中有效。 首先来看一个例子：
+
+```go
+func funcA() {
+	fmt.Println("func A")
+}
+
+func funcB() {
+	panic("panic in B")
+}
+
+func funcC() {
+	fmt.Println("func C")
+}
+func main() {
+	funcA()
+	funcB()
+	funcC()
+}
+```
+
+输出：
+
+```bash
+func A
+panic: panic in B
+
+goroutine 1 [running]:
+main.funcB(...)
+        .../code/func/main.go:12
+main.main()
+        .../code/func/main.go:20 +0x98
+```
+
+程序运行期间`funcB`中引发了`panic`导致程序崩溃，异常退出了。这个时候我们就可以通过`recover`将程序恢复回来，继续往后执行。
+
+```go
+func funcA() {
+	fmt.Println("func A")
+}
+
+func funcB() {
+	defer func() {
+		err := recover()
+		//如果程序出出现了panic错误,可以通过recover恢复过来
+		if err != nil {
+			fmt.Println("recover in B")
+		}
+	}()
+	panic("panic in B")
+}
+
+func funcC() {
+	fmt.Println("func C")
+}
+func main() {
+	funcA()
+	funcB()
+	funcC()
+}
+```
+
+**注意：**
+
+1. `recover()`必须搭配`defer`使用。
+2. `defer`一定要在可能引发`panic`的语句之前定义。
+
+# 练习题
+
+```go
+/*
+你有50枚金币，需要分配给以下几个人：Matthew,Sarah,Augustus,Heidi,Emilie,Peter,Giana,Adriano,Aaron,Elizabeth。
+分配规则如下：
+a. 名字中每包含1个'e'或'E'分1枚金币
+b. 名字中每包含1个'i'或'I'分2枚金币
+c. 名字中每包含1个'o'或'O'分3枚金币
+d: 名字中每包含1个'u'或'U'分4枚金币
+写一个程序，计算每个用户分到多少金币，以及最后剩余多少金币？
+程序结构如下，请实现 ‘dispatchCoin’ 函数
+*/
+var (
+	coins = 50
+	users = []string{
+		"Matthew", "Sarah", "Augustus", "Heidi", "Emilie", "Peter", "Giana", "Adriano", "Aaron", "Elizabeth",
+	}
+	distribution = make(map[string]int, len(users))
+)
+
+func main() {
+	left := dispatchCoin()
+	fmt.Println("剩下：", left)
+}
+```

@@ -434,18 +434,76 @@ a = append(a[:index], a[index+1:]...)
 ## defer输出顺序
 
 ```go
+// defer面试题
+func calc(index string, a, b int) int {
+	ret := a + b
+	fmt.Println(index, a, b, ret)
+	return ret
+}
+
+func main() {
+	x := 1
+	y := 2
+    // 先执行calc("A", 1, 2)得到结果，再将calc("AA", 1, 3)入栈
+	defer calc("AA", x, calc("A", x, y))
+	x = 10
+    // 同上calc("B", 10, 2), calc("BB", 10, 12)
+	defer calc("BB", x, calc("B", x, y))
+	y = 20
+}
+//问，上面代码的输出结果是？
+// [A,1,2,3] [B,10,2,12] [BB,10,12,22] [AA,1,3,4]
+"提示：defer注册要延迟执行的函数时该函数所有的参数都需要确定其值"
+
+//经典案例
+func f1() int {
+	x := 5
+	defer func() {
+		x++
+	}()
+	return x
+}
+
+func f2() (x int) {
+	defer func() {
+		x++
+	}()
+	return 5
+}
+
+func f3() (y int) {
+	x := 5
+	defer func() {
+		x++
+	}()
+	return x
+}
+func f4() (x int) {
+	defer func(x int) {
+		x++
+	}(x)
+	return 5
+}
+func main() {
+	fmt.Println(f1()) // 5
+	fmt.Println(f2()) // 6
+	fmt.Println(f3()) // 5
+	fmt.Println(f4()) // 5
+}
+
+//案例2
 type Person struct {
 	age int
 }
 func Test1() {
 	person := &Person{28}
-	// 1.28
+	// 1. 28
 	defer fmt.Println(person.age)
-	// 2.29
+	// 2. 29
 	defer func(p *Person) {
 		fmt.Println(p.age)
 	}(person)
-	// 3.29
+	// 3. 29
 	defer func() {
 		fmt.Println(person.age)
 	}()
@@ -485,6 +543,21 @@ func main() {
 defer 关键字后面的函数或者方法想要执行必须先注册，return 之后的 defer 是不能注册的， 也就不能执行后面的函数或方法。
 */
 ```
+
+## go的if else
+
+```go
+func main() {
+	if a := 1; false {
+	} else if b := 2; false {
+	} else {
+		println(a, b)
+	}
+}
+// 正常运行 输出 1 2
+```
+
+
 
 ## go的switch case
 
