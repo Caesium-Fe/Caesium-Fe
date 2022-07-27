@@ -1093,7 +1093,7 @@ func main() {
 		return
 	}
 	defer file.Close()
-	str := "hello 沙河"
+	str := "hello 武汉"
 	file.Write([]byte(str))       //写入字节切片数据
 	file.WriteString("hello 小王子") //直接写入字符串数据
 }
@@ -1111,8 +1111,22 @@ func main() {
 	defer file.Close()
 	writer := bufio.NewWriter(file)
 	for i := 0; i < 10; i++ {
-		writer.WriteString("hello沙河\n") //将数据先写入缓存
+		writer.WriteString("hello武汉\n") //将数据先写入缓存
 	}
 	writer.Flush() //将缓存中的内容写入文件
 }
 ```
+
+## ioutil.WriteFile
+
+```go
+func main() {
+	str := "hello 武汉"
+	err := ioutil.WriteFile("./xx.txt", []byte(str), 0666)
+	if err != nil {
+		fmt.Println("write file failed, err:", err)
+		return
+	}
+}
+```
+

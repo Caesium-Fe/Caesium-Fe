@@ -908,3 +908,79 @@ func parseDemo() {
 	fmt.Println(timeObj.Sub(now))
 }
 ```
+
+# strconv包
+
+strconv包实现了基本数据类型与其字符串表示的转换，主要有以下常用函数： `Atoi()`、`Itoa()`、parse系列、format系列、append系列。
+
+更多函数请查看[官方文档](https://golang.org/pkg/strconv/)。
+
+## string与int类型转换
+
+这一组函数是我们平时编程中用的最多的。
+
+### Atoi()
+
+`Atoi()`函数用于将字符串类型的整数转换为int类型，函数签名如下。
+
+```go
+func Atoi(s string) (i int, err error)
+```
+
+如果传入的字符串参数无法转换为int类型，就会返回错误。
+
+```go
+s1 := "100"
+i1, err := strconv.Atoi(s1)
+if err != nil {
+	fmt.Println("can't convert to int")
+} else {
+	fmt.Printf("type:%T value:%#v\n", i1, i1) //type:int value:100
+}
+```
+
+### Itoa()
+
+`Itoa()`函数用于将int类型数据转换为对应的字符串表示，具体的函数签名如下。
+
+```go
+func Itoa(i int) string
+```
+
+示例代码如下：
+
+```go
+i2 := 200
+s2 := strconv.Itoa(i2)
+fmt.Printf("type:%T value:%#v\n", s2, s2) //type:string value:"200"
+```
+
+### a的典故
+
+【扩展阅读】这是C语言遗留下的典故。C语言中没有string类型而是用字符数组(array)表示字符串，所以`Itoa`对很多C系的程序员很好理解。
+
+## Parse系列函数
+
+Parse类函数用于转换字符串为给定类型的值：ParseBool()、ParseFloat()、ParseInt()、ParseUint()。
+
+### ParseBool()
+
+```go
+func ParseBool(str string) (value bool, err error)
+```
+
+返回字符串表示的bool值。它接受1、0、t、f、T、F、true、false、True、False、TRUE、FALSE；否则返回错误。
+
+### ParseInt()
+
+```go
+func ParseInt(s string, base int, bitSize int) (i int64, err error)
+```
+
+返回字符串表示的整数值，接受正负号。
+
+base指定进制（2到36），如果base为0，则会从字符串前置判断，”0x”是16进制，”0”是8进制，否则是10进制；
+
+bitSize指定结果必须能无溢出赋值的整数类型，0、8、16、32、64 分别代表 int、int8、int16、int32、int64；
+
+返回的err是*NumErr类型的，如果语法有误，err.Error = ErrSyntax；如果结果超出类型范围err.Error = ErrRange。
