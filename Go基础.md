@@ -366,7 +366,7 @@ func intSum2(x ...int) int {
 }
 ```
 
-调用上面的函数：
+ // 下面这段代码输出什么？const (    a = iota    b)const (    // iota在遇到const关键字会被重置为0    // const里的技巧：当第一个常量被赋值后    // 后续常量如果没有赋值，那么值同上一个一致    name = "name"    c    = iota    d)​func Iota_learn() {    fmt.Println(a)    fmt.Println(b)    fmt.Println(c)    fmt.Println(d)} // 0 1 1 2// iota 是 golang 语言的常量计数器，只能在常量的表达式中使用。//iota 在 const 关键字出现时将被重置为0，const中每新增一行常量声明将使 iota 计数一次。​// 下面这段代码输出什么？//当类型定义了String方法// 那么在使用fmt输出时就会自动调用Stringtype Direction int​const (    //  iota只需要给一个const赋值    // 那么剩下的就会依次赋值    North Direction = iota    East    South    West)​func (d Direction) String() string {    return [...]string{"North", "East", "South", "West"}[d]}​// 有个例外 就是当类型为指针类型时// 并不会自动调用，得手动// func (d *Direction) String() string {//  return [...]string{"North", "East", "South", "West"}[*d]// }​func Iota_test1() {    fmt.Println(South)}/*参考答案及解析：South。知识点：iota 的用法、类型的 String() 方法。​根据 iota 的用法推断出 South 的值是 2；另外，如果类型定义了 String() 方法，当使用 fmt.Printf()、fmt.Print() 和 fmt.Println() 会自动使用 String() 方法，实现字符串的打印。​Reference:https://wiki.jikexueyuan.com/project/the-way-to-go/10.7.htmlhttps://www.sunansheng.com/archives/24.htmlhttps://yourbasic.org/golang/iota/*/go
 
 ```go
 ret1 := intSum2()
@@ -4956,3 +4956,40 @@ ch <- 2
 | close(ch)   | panic     | panic         | 成功关闭        |
 | ch<- v      | 永远阻塞  | panic         | 成功发送或阻塞  |
 | v,ok = <-ch | 永远阻塞  | 不阻塞        | 成功接收或阻塞  |
+
+# Go的网络编程
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
