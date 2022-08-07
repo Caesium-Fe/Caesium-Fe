@@ -152,6 +152,31 @@ https://haobook.readthedocs.io/zh_CN/latest/periodical/201611/zhangan.html
 https://suraj.pro/post/golang_workaround/
 https://blog.ijun.org/2017/07/cannot-assign-to-struct-field-in-map.html
 */
+
+全局变量赋值的问题：
+var p *int
+
+func foo() (*int, error) {
+	var i int = 5
+	return &i, nil
+}
+
+func bar() {
+	//use p
+	fmt.Println(*p)
+}
+
+func Global_varible_assignment() {
+	// 全局变量不能用 := 赋值，这种赋值属于临时变量
+	// p, err := foo()
+	p, err = foo()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	bar()
+	fmt.Println(*p)
+}
 ```
 
 问题在以上注释中给与解释。
@@ -306,13 +331,13 @@ func main() {
 	b := s[:2] //[1,2]
 	c := s[1:2:cap(s)] //[2]
 }
-```
-
-### 答案解析：
-
+/*
+答案解析：
 参考答案及解析：a、b、c 的长度和容量分别是 0 3、2 3、1 2。
 
 知识点：数组或切片的截取操作。截取操作有带 2 个或者 3 个参数，形如：[i:j] 和 [i:j:k]，假设截取对象的底层数组长度为 l。在操作符 [i:j] 中，如果 i 省略，默认 0，如果 j 省略，默认底层数组的长度，截取得到的**切片长度和容量计算方法是 j-i、l-i**。操作符 [i:j:k]，k 主要是用来限制切片的容量，但是不能大于数组的长度 l，截取得到的**切片长度和容量计算方法是 j-i、k-i**。同python的切片一致，只是多了个容量的概念。
+*/
+```
 
 ### 切片的本质
 
