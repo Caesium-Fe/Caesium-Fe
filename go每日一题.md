@@ -372,7 +372,7 @@ var s []int
 s = append(s, 1, 2, 3)
 ```
 
-没有必要像下面的代码一样初始化一个切片再传入`append()`函数使用，
+xxxxxxxxxx pprof.Register(router)go
 
 ```go
 s := []int{}  // 没有必要初始化
