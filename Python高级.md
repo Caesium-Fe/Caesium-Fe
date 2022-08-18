@@ -362,6 +362,190 @@ df_nested_list = pd.json_normalize(data, record_path =['students'])
 print(df_nested_list)
 ```
 
+# pandas的120道小题
+
+1.将字典创建为DataFrame
+
+```python
+data = {
+    "grammar": ["Python","c","Java","Go",np.nan,"SQL","PHP","Python"],
+    "score": [1,2,np.nan,4,5,6,7,10]
+}
+df = pd.DataFrame(data)
+```
+
+2.提取含有字符串"Python"
+
+2.提取含有"Python"的行
+
+```python
+# 方法1
+df[df["grammar"]=="Python"]
+# 方法2
+result = df["grammar"].str.contains("Python")
+result.fillna(value=False, inplace=True)
+df[result]
+```
+
+3.输出df的所有列名
+
+```python
+df.columns
+```
+
+4.修改第二列列名为"popularity"
+
+```python
+df.rename(columns={"score":"popularity"},inplace=True)
+```
+
+5.统计grammar列中每种编程语言出现的次数
+
+```python
+df["grammar"].value_counts()
+```
+
+6.将空值用上下值的平均值填充
+
+```python
+df["popularity"]=df["popularity"].fillna(df["popularity"].interpolate())
+```
+
+7.提取popularity列中值大于3的行
+
+```python
+df[df["popularity"]>3]
+```
+
+8.按照grammar列进行去除重复值
+
+```python
+df.drop_duplicates(["grammar"])
+```
+
+9.计算popularity列平均值
+
+```python
+df["popularity"].mean()
+```
+
+10.将grammar列转换为list
+
+```python
+df["grammar"].to_list()
+```
+
+11.将DataFrame保存为Excel
+
+```python
+df.to_excel("test.xlsx")
+```
+
+12.查看数据行列数
+
+```python
+# shape是属于df的属性
+df.shape
+```
+
+13.提取popularity列值大于3小于7的行
+
+```python
+df[(df["popularity"]>3)&(df["popularity"]<7)]
+```
+
+14.交换两列位置
+
+```python
+# 方法1
+cols = df.colums([1,0])
+df = df[cols]
+# 方法2
+temp = df["popularity"]
+df.drop(labels=["popularity"],axis=1,inplace=True)
+df.insert(0,"popularity",temp)
+```
+
+15.提取popularity列最大值所在行
+
+```python
+df[df["popularity"]==df["popularity"].max()]
+```
+
+16.查看最后5行数据
+
+```python
+df.tail()
+```
+
+17.删除最后一行数据
+
+```python
+df.drop([len(df)-1],inplace=True)
+```
+
+18.添加一行数据["Perl",6.6]
+
+```python
+row = {"grammar":"Perl","popularity":"6.6"}
+df = df.append(row,ignore_index=True)
+```
+
+19.对数据按照"popularity"列值的大小排序
+
+```python
+df.sort_values("popularity",inplace=True)
+```
+
+20.统计grammar列每个字符串的长度
+
+```python
+df["grammar"] = df["grammar"].fillna("R")
+df["len_str"] = df["grammar"].map(lambda x: len(x))
+```
+
+21.读取本地excel数据
+
+```python
+df.read_excel(file_path)
+```
+
+22.查看df数据前5行
+
+```python
+df.head()
+```
+
+23.将salary列数据转换为最大值
+
+```python
+# 方法1 salary列的类型为字符串，所以需要先整理成整型
+import re
+def func(df):
+	list = df["salary"].split('-')
+	smin = int(list[0].strip('k'))
+	smax = int(list[1].strip('k'))
+	df["salary"] = int((smin+smax) / 2 * 1000)
+	
+df = df.apply(func, axis=1)
+
+# 方法2 直接使用.ix方法或 .iloc方法
+```
+
+24.将数据根据学历进行分组并计算平均薪资
+
+```
+df.groupby("education").mean()
+```
+
+25.将createTime列时间转换为月-日
+
+```python
+# 弹幕里说pandas不能使用for，使用apply
+for i in range(len(df)):
+	df,ix[i,0] = df.ix[i,0].to_pydatetime().strftime("%m-%d")
+```
+
 
 
 ## Numpy库使用
