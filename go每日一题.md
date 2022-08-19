@@ -116,6 +116,29 @@ var3, error3 := strconv.ParseFloat(aa, 32) // 字符串转值类型
 
 不同的类型之间不能进行运算，所以运算前需要将变量的类型统一。
 
+```go
+// 关于类型转化，下面选项正确的是？
+A.错
+type MyInt int
+var i int = 1
+var j MyInt = i
+
+B.错
+type MyInt int
+var i int = 1
+var j MyInt = (MyInt)i
+
+//C.对 改名变量类型 只能用于强制类型转化时使用
+type MyInt int
+var i int = 1
+var j MyInt = MyInt(i)
+
+D.错
+type MyInt int
+var i int = 1
+var j MyInt = i.(MyInt)
+```
+
 ## 变量声明与赋值问题
 
 ```go
