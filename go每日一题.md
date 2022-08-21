@@ -16,6 +16,15 @@
 
 解析：一个进程可以有多个*线程*,一个*线程*可以有多个*协程*。
 
+### 关于switch语句，下面说法正确的有?    ( BD )
+
+- A. 条件表达式必须为常量或者整数；
+- B. 单个case中，可以出现多个结果选项；
+- C. 需要用break来明确退出一个case；
+- D. 只有在case中明确添加fallthrough关键字，才会继续执行紧跟的下一个case；
+
+ 
+
 
 
 ```go
@@ -396,10 +405,50 @@ func main() {
 }
 
 
-// A、B、C、D 哪些选项有语法错误？
+A、B、C、D 哪些选项有语法错误？
 // 参考答案及解析：BD。
 // 函数参数为 interface{} 时可以接收任何类型的参数，包括用户自定义类型等，即使是接收指针类型也用 interface{}，而不是使用 *interface{}。
 
+```
+
+### 如果 Add() 函数的调用代码为：
+
+```go
+func main() {
+	var a Integer = 1
+	var b Integer = 2
+	var i interface{} = &a
+	sum := i.(*Integer).Add(b)
+	fmt.Println(sum)
+}
+```
+
+```go
+则Add函数定义正确的是：( A C )
+A.
+type Integer int
+func (a Integer) Add(b Integer) Integer {
+        return a + b
+}
+
+B.
+type Integer int
+func (a Integer) Add(b *Integer) Integer {
+        return a + *b
+}
+
+C.
+type Integer int
+func (a *Integer) Add(b Integer) Integer {
+        return *a + b
+}
+
+D.
+type Integer int
+func (a *Integer) Add(b *Integer) Integer {
+        return *a + *b
+}
+//知识点：类型断言、方法集
 ```
 
 ## 实际使用

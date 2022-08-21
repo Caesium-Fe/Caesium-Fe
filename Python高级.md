@@ -546,6 +546,44 @@ for i in range(len(df)):
 	df,ix[i,0] = df.ix[i,0].to_pydatetime().strftime("%m-%d")
 ```
 
+26.查看索引、数据类型和内存信息
+
+```python
+df.info()
+```
+
+27.查看数值型列的汇总统计
+
+```python
+df.describe()
+```
+
+28.新增一列根据salary将数据分为三组
+
+```python
+bins = [0,5000,20000,50000]
+group_names = ["","",""]
+df['categories'] = pd.cut(df['salary'], bins, labels=group_names)
+```
+
+29.按照salary列对数据降序排列
+
+```python
+df.sort_values('salary', ascending=True/False)
+```
+
+30.取出第33行数据
+
+```python
+df.loc[32]
+```
+
+
+
+
+
+
+
 
 
 ## Numpy库使用
