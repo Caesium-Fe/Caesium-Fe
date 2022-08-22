@@ -74,6 +74,25 @@ for i := range s1 {
 	s2[i] = &s1[i]
 }
 */
+扩展题目
+type Test struct {
+	name string
+}
+func (this *Test) Point(){
+	fmt.Println(this.name)
+}
+func main() {
+	ts := []Test{
+		{"a"},
+		{"b"},
+		{"c"},
+	}
+	for _,t := range ts {
+		//fmt.Println(reflect.TypeOf(t))
+		defer t.Point()
+	}	
+}
+// 输出："c" "c" "c"
 ```
 
 
