@@ -783,8 +783,6 @@ func main() {
 a = append(a[:index], a[index+1:]...)
 ```
 
-
-
 ## defer输出顺序
 
 ```go
@@ -897,6 +895,10 @@ func main() {
 defer 关键字后面的函数或者方法想要执行必须先注册，return 之后的 defer 是不能注册的， 也就不能执行后面的函数或方法。
 */
 ```
+
+## defer和panic的执行顺序
+
+解析：defer 的执行顺序是后进先出。当出现 panic 语句的时候，会先按照 defer 的后进先出的顺序执行，最后才会执行panic。
 
 ## go的if else
 
