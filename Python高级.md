@@ -578,9 +578,139 @@ df.sort_values('salary', ascending=True/False)
 df.loc[32]
 ```
 
+31.计算salary列的中位数
+
+```python
+np.median(df['salary'])
+```
+
+32.绘制薪资水平频率分布直方图
+
+```python
+import matplotlib.pylot as plt
+df.salary.plot(kind='hist')
+```
+
+33.绘制薪资水平密度曲线
+
+```python
+df.salary.plot(kind='kde',xlim(0,8000))
+```
+
+34.删除最后一列categories
+
+```python
+df.drop(columns=['categories'],inplace=True)
+```
+
+35.将df的第一列与第二列合并为新的一列
+
+```python
+df['test'] = df['education'] + df['creatTime']
+```
+
+36.将education列与salary列合并微信的一列
+
+```python
+df['test1'] = df['salary'].map(str)+ df['education']
+```
+
+37.计算salary最大值与最小值之差
+
+```python
+df[['salary']].apply(lambda x:x.max()-x.min())
+```
+
+38.将第一行与最后一行拼接
+
+```python
+pd.concat([df[:1],df[-2:-1]])
+```
+
+39.将第8行数据添加至末尾
+
+```python
+df.append(df.iloc[7])
+```
+
+40.查看每列的数据类型
+
+```python
+df.dtypes
+```
+
+41.将creatTime列设置为索引
+
+```python
+df.set_index("creatTime")
+```
+
+42.生成一个和df长度相同的随机数dataframe
+
+```python
+df1 = pd.DataFrame(pd.Series(np.random.randint(1,10,135)))
+```
+
+43.将上一题生成的dataframe与df合并
+
+```python
+df = pd.concat([df,df1],axis=1)
+```
+
+44.生成新的一列new为salary列减去之前生成随机数列
+
+```python
+df["new"] = int(df['salary']) - int(df[0])
+```
+
+45.检查数据中是否含有任何缺失值
+
+```python
+df.isnull().value.any()
+```
+
+46.将salary列类型转换为浮点数
+
+```python
+df['salary'].astype(np.float64)
+```
+
+47.计算salary大于10000的次数
+
+```python
+len(df[df['salary']>10000])
+```
+
+48.查看每种学历出现的次数
+
+```python
+# 方法1
+len(df[df['education']])
+# 方法2
+df.education.value_counts()
+```
+
+49.查看education列共有几种学历
+
+```python
+df['education'].nunique()
+```
+
+50.提取salary与new列的和大于60000的最后三行
+
+```python
+df1 = df[['salary','new']]
+rowsums = df1.apply(np.sum,axis=1)
+res = df.iloc[np.where(rowsums>60000)[0][-3:],:]
+```
+
+## 金融数据处理
+
+51.使用绝对路径读取本地Excel数据
 
 
 
+52.查看数据前三行
 
 
 
