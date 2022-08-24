@@ -708,11 +708,72 @@ res = df.iloc[np.where(rowsums>60000)[0][-3:],:]
 
 51.使用绝对路径读取本地Excel数据
 
-
+```python\
+data = pd.read_excel("file_path")
+```
 
 52.查看数据前三行
 
+```python
+data.head(3)
+```
 
+53.查看每列数据缺失值情况
+
+```python
+data.isnull().sum()
+```
+
+54.提取日期列含有空值的行
+
+```python
+data[data['日期'].isnull()]
+```
+
+55.输出每列缺失值具体行数
+
+```python
+for column in data.columns:
+	if data[column].count() != len(data)
+	loc = data[column][data[column].isnull().values==True].index.tolist
+	print("列名："{}",第{}行位置有缺失值".format(column,loc))
+```
+
+56.删除所有存在缺失值的行
+
+```python
+data.dropna(axis=0,how='any',inplace=True)
+```
+
+57.绘制收盘价的折线图
+
+```python
+# 方法1
+plt.style.use("seaborn-darkgrid")
+plt.rc("font",size=6)
+plt.rc("figure",figsize=(4,3),dpi=150)
+data["收盘价"].plot()
+# 方法2
+plt.plot(data["收盘价"])
+```
+
+58.同时绘制开盘价和收盘价
+
+```python
+plt.plot(data[["收盘价"],["开盘价"]])
+```
+
+59.绘制涨跌幅的直方图
+
+```python
+plt.hist(data["涨跌幅"])
+```
+
+60.让直方图更细致
+
+```python
+data["涨跌幅"].hist(ant=3)
+```
 
 
 
