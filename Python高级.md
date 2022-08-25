@@ -775,6 +775,166 @@ plt.hist(data["涨跌幅"])
 data["涨跌幅"].hist(ant=3)
 ```
 
+61.以data的列名创建一个dataframe
+
+```python
+temp = pd.DataFrame(columns=data.columns.to_list())
+```
+
+62.打印所有换手率不是数字的行
+
+```python
+for i in range(len(data)):
+	if type(data.iloc[i,13]) != float:
+		temp = temp.append(data.loc[i])
+```
+
+63.打印所有换手率为‘--’的行
+
+```python
+data[data["换手率"].isin(['--'])]
+```
+
+64.重置data的行号
+
+```python
+data = data.reset_index()
+```
+
+65.删除所有换手率为非数字的行
+
+```python
+k=[]
+for i in range(len(data)):
+	if type(data.iloc[i,13]) != float:
+		k.append()
+data.drop(labels=k,inplace=True)
+```
+
+66.绘制换手率的密度曲线
+
+```python
+data[""].plot(kind="kde")
+```
+
+67.计算前一天与后一天收盘价的差值
+
+```python
+data["收盘价"].diff()
+```
+
+68.计算前一天与后一天收盘价变化率
+
+```python
+data["收盘价"].pct_change()
+```
+
+69.设置日期为索引
+
+```python
+data = data.set_index("日期")
+```
+
+70.以5个数据作为一个数据滑动窗口，在这个5个数据上取平均值(收盘价)
+
+```python
+data["收盘价"].rolling(5).mean()
+```
+
+71.以5个数据作为一个数据滑动窗口，在这个5个数据上总和(收盘价)
+
+```
+data["收盘价"].rolling(5).sum()
+```
+
+72.将收盘价5日均线、20日均线与原始数据绘制在同一个图上
+
+```python
+data["收盘价"].plot()
+data["收盘价"].rolling(5).mean().plot()
+data["收盘价"].rolling(20).mean().plot()
+```
+
+73.按周为采样规则，取一周收盘价最大值
+
+```python
+data["收盘价"].resample("W").sum()
+```
+
+74.绘制重采样数据与原始数据
+
+```python
+data["收盘价"].plot()
+data["收盘价"].resample("7D").max().plot()
+```
+
+75.将数据往后移动5天
+
+```python
+data.shift((5))
+```
+
+76.将数据往前移动5天
+
+```python
+data.shift((-5))
+```
+
+77.使用expanding函数计算开盘价的移动窗口均值
+
+```python
+data["收盘价"].expanding(min_periods=1).mean()
+```
+
+78.绘制上一题的移动均值与原始数据折线图
+
+```python
+data["expanding Open mean"] = data["收盘价"].expanding(min_periods=1).mean()
+data[["expanding Open mean","收盘价"]].plot()
+```
+
+79.计算布林指标
+
+```python
+# 计算一个月内的平均开盘价
+data["former 30 days rolling Close mean"] = data["收盘价"].rolling(20).mean()
+# 最高
+data['upper bound'] = data["former 30 days rolling Close mean"] + 2 * data["收盘价"].rolling(20).std()
+# 最低
+data['lower bound'] = data["former 30 days rolling Close mean"] - 2 * data["收盘价"].rolling(20).std()
+```
+
+80.计算布林线并绘制
+
+```python
+data[["收盘价","former 30 days rolling Close mean","upper bound","lower bound"]].plot(figsize=(16，6))
+```
+
+## 当Pandas遇到Numpy
+
+82.从Numpy数据创建DataFrame
+
+```python
+temp = np.random.randint(1,100,20)
+df1 = pd.DataFrame(temp)
+temp1 = np.arrange(0,100,5)
+df2 = pd.DataFrame(temp1)
+temp2 = np.random.normal(0,1,20)
+df3 = pd.DataFrame(temp2)
+```
+
+83.将df1,df2,df3按照行合并为新DataFrame
+
+```python
+df = pd.concat([df1,df2,df3],axis=0,ignore_index=True)
+```
+
+84.将df1,df2,df3按照列合并为新DataFrame
+
+```
+
+```
+
 
 
 ## Numpy库使用
