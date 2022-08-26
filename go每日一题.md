@@ -1,3 +1,7 @@
+Go的map可以边遍历边删除吗？
+
+
+
 ### 关于循环语句，下面说法正确的有（CD）
 
 - A. 循环语句既支持 for 关键字，也支持 while 和 do-while；
@@ -22,10 +26,6 @@
 - B. 单个case中，可以出现多个结果选项；
 - C. 需要用break来明确退出一个case；
 - D. 只有在case中明确添加fallthrough关键字，才会继续执行紧跟的下一个case；
-
- 
-
-
 
 ```go
 func main() {
