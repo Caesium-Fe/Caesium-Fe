@@ -21,6 +21,47 @@ Go的map可以边遍历边删除吗？
 另外，sync.Map 是线程安全的 map，也可以使用。
 ```
 
+下面代码是否可以编译通过？为什么？
+
+```go
+package main
+import "fmt"
+func main() {
+	sn1 := struct {
+		age  int
+		name string
+	}{age: 11, name: "qq"}
+	sn2 := struct {
+		age  int
+		name string
+	}{age: 11, name: "qq"}
+	if sn1 == sn2 {
+		fmt.Println("sn1 == sn2")
+	}
+	sm1 := struct {
+		age int
+		m   map[string]string
+	}{age: 11, m: map[string]string{"a": "1"}}
+	sm2 := struct {
+		age int
+		m   map[string]string
+	}{age: 11, m: map[string]string{"a": "1"}}
+	if sm1 == sm2 {
+		fmt.Println("sm1 == sm2")
+	}
+}
+
+编译不通过。
+
+./prog.go:31:9: invalid operation: sm1 == sm2 (struct containing map[string]string cannot be compared)
+
+考点：结构体比较
+
+结构体比较规则注意1：只有相同类型的结构体才可以比较，结构体是否相同不但与属性类型个数有关，还与属性顺序相关。
+```
+
+
+
 
 
 ### 关于循环语句，下面说法正确的有（CD）
