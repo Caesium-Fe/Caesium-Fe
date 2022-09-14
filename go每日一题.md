@@ -227,6 +227,10 @@ D.错
 type MyInt int
 var i int = 1
 var j MyInt = i.(MyInt)
+
+// 还有另一种换名方式 这样赋值是不会出错的
+type MyInt1 = int
+var i MyInt1 = 2
 ```
 
 ## 变量声明与赋值问题
