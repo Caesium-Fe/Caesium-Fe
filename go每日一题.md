@@ -188,9 +188,12 @@ go的字符串由字节组成，没有字符。所以需要对其修改时，使
 
 在字符串赋值时可以使用 " " 也可以使用 ``(反引号，键盘左上角)，他们的区别在于前者可以识别转义字符，后者不会。
 
+#### 字符串拼接：
+
 ```go
 varstr := "hello" + " world" //字符串可通过 + 连接
 varstr += "！" // 可以通过 += 来对自身进行拓展
+还有 strings.Join()、buffer.WriteString()等
 ```
 
 #### 类型转换：
@@ -1168,7 +1171,7 @@ import (
 	"time"
 )
 
-func talk(msg string, sleep int) <-chan string {
+func talk(msg string, sleep int) <-chan  {
 	ch := make(chan string)
 	go func() {
 		for i := 0; i < 5; i++ {
