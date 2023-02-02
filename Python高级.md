@@ -1018,6 +1018,25 @@ cursor.fetchall()获取查询结果集中所有的数据行，返回一个列表
 
 # Django框架学习
 
+django的版本选取需要结合python环境版本来抉择，对应关系为：
+
+| Django version | Python versions                                 |
+| :------------- | :---------------------------------------------- |
+| 1.8            | 2.7, 3.2 (until the end of 2016), 3.3, 3.4, 3.5 |
+| 1.9, 1.10      | 2.7, 3.4, 3.5                                   |
+| 1.11           | 2.7, 3.4, 3.5, 3.6                              |
+| 2.0            | 3.4, 3.5, 3.6                                   |
+| 2.1            | 3.5, 3.6, 3.7                                   |
+
+```shell
+# django项目创建命令：
+django-admin startproject xxxxxxxx(项目名)
+# django创建app
+python manage.py startapp xxxxxxxx(app名)
+# django服务启动
+python manage.py runserver
+```
+
 项目框架的文件管理关系为：
 
 项目名称

@@ -205,6 +205,11 @@ varsa := 12.9
 varsa2 := int(varsa) // 这样会损失精度， 0.9直接被丢弃
 aa := fmt.Sprintf("%f",varsa) // 转换为字符串
 var3, error3 := strconv.ParseFloat(aa, 32) // 字符串转值类型
+// 类型转换
+int, err := strconv.Atoi(string)               // string -> int
+int64, err := strconv.ParseInt(string, 10, 64) // string -> int64
+string := strconv.Itoa(int)                    // int    -> string
+string := strconv.FormatInt(int64, 10)         // int64  -> string
 ```
 
 不同的类型之间不能进行运算，所以运算前需要将变量的类型统一。
