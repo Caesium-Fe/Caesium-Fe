@@ -111,7 +111,19 @@ func main() {
 }
 ```
 
-开发RESTful API的时候我们通常使用[Postman](https://www.getpostman.com/)来作为客户端的测试工具。
+此外，还有一个可以匹配所有请求方法的Any方法如下
+
+```go
+r.Any("/test",func(c *gin.Context) {})
+```
+
+为没有配置处理函数的路由添加处理程序，默认情况下它返回404代码，以下为没有匹配到路由的请求返回的是`templates/404.html`页面
+
+```go
+r.NoRoute(func(c *gin.Context) {
+		c.HTML(http.StatusNotFound,"templates/404.html",nil)
+})
+```
 
 ## Gin渲染
 
@@ -720,6 +732,30 @@ Gin框架中的路由使用的是[httprouter](https://github.com/julienschmidt/h
 
 Gin框架允许开发者在处理请求的过程中，加入用户自己的钩子（Hook）函数。这个钩子函数就叫中间件，中间件适合处理一些公共的业务逻辑，比如登录认证、权限校验、数据分页、记录日志、耗时统计等。
 
+```go
+//定义一个中间键m1统计请求处理函数耗时
+func m1(c *gin.Context) {
+	fmt.Println("m1 in...")
+	start := time.Now()
+	// c.Next() //调用后续的处理函数
+	c.Abort()//阻止调用后续的处理函数
+	cost := time.Since(start)
+	fmt.Printf("cost:%v\n", cost)
+}
+
+func index(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"msg": "ok",
+	})
+}
+
+func main() {
+	r := gin.Default()
+	r.GET("/", m1, index)
+	r.Run()
+}
+```
+
 ### 定义中间件
 
 Gin中的中间件必须是一个`gin.HandlerFunc`类型。
@@ -903,6 +939,35 @@ shopGroup.Use(StatCost())
 #### gin中间件中使用goroutine
 
 当在中间件或`handler`中启动新的`goroutine`时，**不能使用**原始的上下文（c *gin.Context），必须使用其只读副本（`c.Copy()`）。
+
+```go
+func main() {
+	r := gin.Default()
+
+	r.GET("/long_async", func(c *gin.Context) {
+		// 创建在 goroutine 中使用的副本
+		tmp := c.Copy()
+		go func() {
+			// 用 time.Sleep() 模拟一个长任务。
+			time.Sleep(5 * time.Second)
+
+			// 请注意您使用的是复制的上下文 "tmp"，这一点很重要
+			log.Println("Done! in path " + tmp.Request.URL.Path)
+		}()
+	})
+
+	r.GET("/long_sync", func(c *gin.Context) {
+		// 用 time.Sleep() 模拟一个长任务。
+		time.Sleep(5 * time.Second)
+
+		// 因为没有使用 goroutine，不需要拷贝上下文
+		log.Println("Done! in path " + c.Request.URL.Path)
+	})
+	r.Run()
+}
+```
+
+
 
 ### 如何写一个日志文件
 
