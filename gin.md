@@ -992,17 +992,17 @@ func main() {
 }
 ```
 
-### Custom Log Format
+### 自定义日志格式
 
 ```go
 func main() {
 	router := gin.New()
 
-	// LoggerWithFormatter middleware will write the logs to gin.DefaultWriter
-	// By default gin.DefaultWriter = os.Stdout
+	// LoggerWithFormatter 中间件将日志写入 gin.DefaultWriter
+	// 默认情况下 gin.DefaultWriter = os.Stdout
 	router.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 
-		// your custom format
+		// 自定义格式
 		return fmt.Sprintf("%s - [%s] \"%s %s %s %d %s \"%s\" %s\"\n",
 				param.ClientIP,
 				param.TimeStamp.Format(time.RFC1123),
@@ -1025,25 +1025,24 @@ func main() {
 }
 ```
 
-**Sample Output**
+**样本输出**
 
 ```bash
 ::1 - [Fri, 07 Dec 2018 17:04:38 JST] "GET /ping HTTP/1.1 200 122.767µs "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.80 Safari/537.36" "
 ```
 
-### Controlling Log output coloring
+### 控制日志输出着色
 
-By default, logs output on console should be colorized depending on the detected TTY.
-
-Never colorize logs:
+默认情况下，控制台上的日志输出应根据检测到的TTY进行着色。
+从不为日志着色：
 
 ```go
 func main() {
-    // Disable log's color
+    // 禁用日志颜色
     gin.DisableConsoleColor()
 
-    // Creates a gin router with default middleware:
-    // logger and recovery (crash-free) middleware
+    // 使用默认中间件创建gin路由：
+    // 记录器和恢复（无故障）中间件
     router := gin.Default()
 
     router.GET("/ping", func(c *gin.Context) {
@@ -1054,15 +1053,15 @@ func main() {
 }
 ```
 
-Always colorize logs:
+始终为日志着色：
 
 ```go
 func main() {
-    // Force log's color
+    // 强制日志颜色
     gin.ForceConsoleColor()
 
-    // Creates a gin router with default middleware:
-    // logger and recovery (crash-free) middleware
+    // 使用默认中间件创建gin路由：
+    // 记录器和恢复（无故障）中间件
     router := gin.Default()
 
     router.GET("/ping", func(c *gin.Context) {
@@ -1073,37 +1072,29 @@ func main() {
 }
 ```
 
-### Model binding and validation
+### 模型绑定和验证
 
-To bind a request body into a type, use model binding. We currently support binding of JSON, XML, YAML, TOML and standard form values (foo=bar&boo=baz).
+要将请求体绑定到类型中，请使用模型绑定。我们目前支持JSON、XML、YAML、TOML和标准表单值（foo=bar&boo=baz）的绑定。
 
 Gin uses **go-playground/validator/v10** for validation. Check the full docs on tags usage here.
 
-Note that you need to set the corresponding binding tag on all fields you want to bind. For example, when binding from JSON, set `json:"fieldname"`.
+注意，您需要在所有要绑定的字段上设置相应的绑定标记。例如，当从JSON绑定时，设置`JSON:“fieldname”`。
 
-Also, Gin provides two sets of methods for binding:
+此外，Gin提供了两组绑定方法：
 
-- Type
+**\- Must bind**
 
-   
+- **Methods** - `Bind`, `BindJSON`, `BindXML`, `BindQuery`, `BindYAML`, `BindHeader`, `BindTOML`
+- **Behavior** - 这些方法在后台使用“MustBindWith”。如果存在绑定错误，则使用“c.AbortWithError（400，err）.SetType（ErrorTypeBind）”中止请求。这会将响应状态代码设置为400，并将“Content Type”标头设置为“text/plain；charset=utf-8`。请注意，如果在此之后尝试设置响应代码，将导致警告`[GIN debug][warning]标头已写入。希望用422`覆盖状态代码400。如果希望对行为有更好的控制，请考虑使用“ShouldBind”等效方法。
 
-  \- Must bind
+**\- Should bind**
 
-  - **Methods** - `Bind`, `BindJSON`, `BindXML`, `BindQuery`, `BindYAML`, `BindHeader`, `BindTOML`
-  - **Behavior** - These methods use `MustBindWith` under the hood. If there is a binding error, the request is aborted with `c.AbortWithError(400, err).SetType(ErrorTypeBind)`. This sets the response status code to 400 and the `Content-Type` header is set to `text/plain; charset=utf-8`. Note that if you try to set the response code after this, it will result in a warning `[GIN-debug] [WARNING] Headers were already written. Wanted to override status code 400 with 422`. If you wish to have greater control over the behavior, consider using the `ShouldBind` equivalent method.
+- **Methods** - `ShouldBind`, `ShouldBindJSON`, `ShouldBindXML`, `ShouldBindQuery`, `ShouldBindYAML`, `ShouldBindHeader`, `ShouldBindTOML`,
+- **Behavior** - 这些方法在引擎盖下使用“ShouldBindWith”。如果存在绑定错误，则返回错误，开发人员有责任正确处理请求和错误。
 
-- Type
+使用Bind方法时，Gin尝试根据Content-Type标头推断绑定器。如果确定要绑定的内容，可以使用“MustBindWith”或“ShouldBindWith。”。
 
-   
-
-  \- Should bind
-
-  - **Methods** - `ShouldBind`, `ShouldBindJSON`, `ShouldBindXML`, `ShouldBindQuery`, `ShouldBindYAML`, `ShouldBindHeader`, `ShouldBindTOML`,
-  - **Behavior** - These methods use `ShouldBindWith` under the hood. If there is a binding error, the error is returned and it is the developer's responsibility to handle the request and error appropriately.
-
-When using the Bind-method, Gin tries to infer the binder depending on the Content-Type header. If you are sure what you are binding, you can use `MustBindWith` or `ShouldBindWith`.
-
-You can also specify that specific fields are required. If a field is decorated with `binding:"required"` and has a empty value when binding, an error will be returned.
+还可以指定需要特定字段。如果字段用`binding:“required”`修饰，并且在绑定时具有空值，则将返回错误。
 
 ```go
 // Binding from JSON
@@ -1174,7 +1165,7 @@ func main() {
 }
 ```
 
-**Sample request**
+**样品请求**
 
 ```bash
 $ curl -v -X POST \
@@ -1197,13 +1188,13 @@ $ curl -v -X POST \
 {"error":"Key: 'Login.Password' Error:Field validation for 'Password' failed on the 'required' tag"}
 ```
 
-**Skip validate**
+**跳过验证**
 
-When running the above example using the above the `curl` command, it returns error. Because the example use `binding:"required"` for `Password`. If use `binding:"-"` for `Password`, then it will not return error when running the above example again.
+当使用上面的“curl”命令运行上面的示例时，它返回错误。因为该示例对 “Password” 使用 “binding：“required”” 。如果对 “Password” 使用 “binding：‘-’” ，则再次运行上述示例时不会返回错误。
 
-### Custom Validators
+### 自定义验证器
 
-It is also possible to register custom validators. See the example code.
+也可以注册自定义验证器。请参见示例代码。
 
 ```go
 package main
@@ -1217,7 +1208,7 @@ import (
 ​	"github.com/go-playground/validator/v10"
 )
 
-// Booking contains binded and validated data.
+// 预订包含绑定和验证的数据。
 type Booking struct {
 	CheckIn  time.Time `form:"check_in" binding:"required,bookabledate" time_format:"2006-01-02"`
 	CheckOut time.Time `form:"check_out" binding:"required,gtfield=CheckIn" time_format:"2006-01-02"`
@@ -1266,9 +1257,9 @@ $ curl "localhost:8085/bookable?check_in=2000-03-09&check_out=2000-03-10"
 {"error":"Key: 'Booking.CheckIn' Error:Field validation for 'CheckIn' failed on the 'bookabledate' tag"}%
 ```
 
-### Only Bind Query String
+### 仅绑定查询字符串
 
-`ShouldBindQuery` function only binds the query params and not the post data. See the detail information.
+`ShouldBindQuery` 函数只绑定查询参数，而不绑定post数据。请参见详细信息。
 
 ```go
 package main
@@ -1302,9 +1293,9 @@ func startPage(c *gin.Context) {
 }
 ```
 
-### Bind Query String or Post Data
+### 绑定查询字符串或发布数据
 
-See the detail information.
+请参见详细信息。
 
 ```go
 package main
@@ -1354,7 +1345,7 @@ Test it with:
 $ curl -X GET "localhost:8085/testing?name=appleboy&address=xyz&birthday=1992-03-15&createTime=1562400033000000123&unixTime=1562400033"
 ```
 
-### Bind Uri
+### 绑定Uri
 
 See the [detail information](https://github.com/gin-gonic/gin/issues/846).
 
@@ -1393,7 +1384,7 @@ $ curl -v localhost:8088/thinkerou/987fbc97-4bed-5078-9f07-9141ba07c9f3
 $ curl -v localhost:8088/thinkerou/not-uuid
 ```
 
-### Bind Header
+### 绑定Header
 
 ```go
 package main
@@ -1432,13 +1423,13 @@ func main() {
 }
 ```
 
-### Bind HTML checkboxes
+### 绑定HTML复选框
 
 See the [detail information](https://github.com/gin-gonic/gin/issues/129#issuecomment-124260092)
 
 main.go
 
-```
+```go
 ...
 
 type myForm struct {
@@ -1458,7 +1449,7 @@ func formHandler(c *gin.Context) {
 
 form.html
 
-```
+```html
 <form action="/" method="POST">
     <p>Check some colors</p>
     <label for="red">Red</label>
@@ -1477,9 +1468,9 @@ result:
 {"color":["red","green","blue"]}
 ```
 
-### Multipart/Urlencoded binding
+### Multipart/Urlencoded 绑定
 
-```
+```go
 type ProfileForm struct {
 	Name   string                `form:"name" binding:"required"`
 	Avatar *multipart.FileHeader `form:"avatar" binding:"required"`
@@ -1517,13 +1508,13 @@ func main() {
 
 Test it with:
 
-```
+```shell
 $ curl -X POST -v --form name=user --form "avatar=@./avatar.png" http://localhost:8080/profile
 ```
 
 ### XML, JSON, YAML and ProtoBuf rendering
 
-```
+```go
 func main() {
 	r := gin.Default()
 
@@ -1563,8 +1554,8 @@ func main() {
 			Label: &label,
 			Reps:  reps,
 		}
-		// Note that data becomes binary data in the response
-		// Will output protoexample.Test protobuf serialized data
+		//注意，数据在响应中变为二进制数据
+		//将输出protoexample。测试protobuf序列化数据	
 		c.ProtoBuf(http.StatusOK, data)
 	})
 
@@ -1577,7 +1568,7 @@ func main() {
 
 Using SecureJSON to prevent json hijacking. Default prepends `"while(1),"` to response body if the given struct is array values.
 
-```
+```go
 func main() {
 	r := gin.Default()
 
@@ -1600,7 +1591,7 @@ func main() {
 
 Using JSONP to request data from a server in a different domain. Add callback to response body if the query parameter callback exists.
 
-```
+```go
 func main() {
 	r := gin.Default()
 
@@ -1626,7 +1617,7 @@ func main() {
 
 Using AsciiJSON to Generates ASCII-only JSON with escaped non-ASCII characters.
 
-```
+```go
 func main() {
 	r := gin.Default()
 
@@ -1647,9 +1638,9 @@ func main() {
 
 #### PureJSON
 
-Normally, JSON replaces special HTML characters with their unicode entities, e.g. `<` becomes `\u003c`. If you want to encode such characters literally, you can use PureJSON instead. This feature is unavailable in Go 1.6 and lower.
+通常，JSON用其unicode实体替换特殊的HTML字符，例如“<”变为“\u003c”。如果您想对这些字符进行字面编码，可以改用PureJSON。此功能在Go 1.6及更低版本中不可用。
 
-```
+```go
 func main() {
 	r := gin.Default()
 
@@ -1672,9 +1663,9 @@ func main() {
 }
 ```
 
-### Serving static files
+### 提供静态文件
 
-```
+```go
 func main() {
 	router := gin.Default()
 	router.Static("/assets", "./assets")
@@ -1687,9 +1678,9 @@ func main() {
 }
 ```
 
-### Serving data from file
+### 从文件提供数据
 
-```
+```go
 func main() {
 	router := gin.Default()
 
@@ -1704,9 +1695,9 @@ func main() {
 }
 ```
 
-### Serving data from reader
+### 从读取器提供数据
 
-```
+```go
 func main() {
 	router := gin.Default()
 	router.GET("/someDataFromReader", func(c *gin.Context) {
@@ -1735,7 +1726,7 @@ func main() {
 
 Using LoadHTMLGlob() or LoadHTMLFiles()
 
-```
+```go
 func main() {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
@@ -1751,7 +1742,7 @@ func main() {
 
 templates/index.tmpl
 
-```
+```html
 <html>
 	<h1>
 		{{ .title }}
@@ -1759,9 +1750,9 @@ templates/index.tmpl
 </html>
 ```
 
-Using templates with same name in different directories
+在不同目录中使用同名模板
 
-```
+```go
 func main() {
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/**/*")
@@ -1781,7 +1772,7 @@ func main() {
 
 templates/posts/index.tmpl
 
-```
+```html
 {{ define "posts/index.tmpl" }}
 <html><h1>
 	{{ .title }}
@@ -1793,7 +1784,7 @@ templates/posts/index.tmpl
 
 templates/users/index.tmpl
 
-```
+```html
 {{ define "users/index.tmpl" }}
 <html><h1>
 	{{ .title }}
@@ -1803,11 +1794,11 @@ templates/users/index.tmpl
 {{ end }}
 ```
 
-#### Custom Template renderer
+#### 自定义模板渲染器
 
-You can also use your own html template render
+您也可以使用自己的html模板渲染
 
-```
+```go
 import "html/template"
 
 func main() {
@@ -1818,23 +1809,23 @@ func main() {
 }
 ```
 
-#### Custom Delimiters
+#### 自定义分隔符
 
 You may use custom delims
 
-```
+```go
 	r := gin.Default()
 	r.Delims("{[{", "}]}")
 	r.LoadHTMLGlob("/path/to/templates")
 ```
 
-#### Custom Template Funcs
+#### 自定义模板函数
 
 See the detail [example code](https://github.com/gin-gonic/examples/tree/master/template).
 
 main.go
 
-```
+```go
 import (
     "fmt"
     "html/template"
@@ -1869,7 +1860,7 @@ func main() {
 
 raw.tmpl
 
-```
+```jsp
 Date: {[{.now | formatAsDate}]}
 ```
 
@@ -1881,13 +1872,13 @@ Date: 2017/07/01
 
 ### Multitemplate
 
-Gin allow by default use only one html.Template. Check [a multitemplate render](https://github.com/gin-contrib/multitemplate) for using features like go 1.6 `block template`.
+Gin默认情况下只允许使用一个html.Template. Check [a multitemplate render](https://github.com/gin-contrib/multitemplate) for using features like go 1.6 `block template`.
 
 ### Redirects
 
-Issuing a HTTP redirect is easy. Both internal and external locations are supported.
+发出HTTP重定向很容易。支持内部和外部位置。
 
-```
+```go
 r.GET("/test", func(c *gin.Context) {
 	c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
 })
@@ -1895,7 +1886,7 @@ r.GET("/test", func(c *gin.Context) {
 
 Issuing a HTTP redirect from POST. Refer to issue: [#444](https://github.com/gin-gonic/gin/issues/444)
 
-```
+```go
 r.POST("/test", func(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/foo")
 })
@@ -1903,7 +1894,7 @@ r.POST("/test", func(c *gin.Context) {
 
 Issuing a Router redirect, use `HandleContext` like below.
 
-```
+```go
 r.GET("/test", func(c *gin.Context) {
     c.Request.URL.Path = "/test2"
     r.HandleContext(c)
@@ -1915,7 +1906,7 @@ r.GET("/test2", func(c *gin.Context) {
 
 ### Custom Middleware
 
-```
+```go
 func Logger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		t := time.Now()
@@ -1955,7 +1946,7 @@ func main() {
 
 ### Using BasicAuth() middleware
 
-```
+```go
 // simulate some private data
 var secrets = gin.H{
 	"foo":    gin.H{"email": "foo@bar.com", "phone": "123433"},
@@ -1992,22 +1983,22 @@ func main() {
 }
 ```
 
-### Goroutines inside a middleware
+### 中间件内部的Goroutine
 
-When starting new Goroutines inside a middleware or handler, you **SHOULD NOT** use the original context inside it, you have to use a read-only copy.
+当在中间件或处理程序中启动新的Goroutine时，您**不应该**在其中使用原始上下文，您必须使用只读副本.
 
-```
+```go
 func main() {
 	r := gin.Default()
 
 	r.GET("/long_async", func(c *gin.Context) {
-		// create copy to be used inside the goroutine
+		// 创建要在goroutine中使用的副本
 		cCp := c.Copy()
 		go func() {
 			// simulate a long task with time.Sleep(). 5 seconds
 			time.Sleep(5 * time.Second)
 
-			// note that you are using the copied context "cCp", IMPORTANT
+			// 请注意，您使用的是复制的上下文“cCp”，重要信息
 			log.Println("Done! in path " + cCp.Request.URL.Path)
 		}()
 	})
@@ -2016,7 +2007,7 @@ func main() {
 		// simulate a long task with time.Sleep(). 5 seconds
 		time.Sleep(5 * time.Second)
 
-		// since we are NOT using a goroutine, we do not have to copy the context
+		// 因为我们没有使用goroutine，所以我们不必复制上下文
 		log.Println("Done! in path " + c.Request.URL.Path)
 	})
 
@@ -2025,11 +2016,11 @@ func main() {
 }
 ```
 
-### Custom HTTP configuration
+### 自定义HTTP配置
 
 Use `http.ListenAndServe()` directly, like this:
 
-```
+```go
 func main() {
 	router := gin.Default()
 	http.ListenAndServe(":8080", router)
@@ -2038,7 +2029,7 @@ func main() {
 
 or
 
-```
+```go
 func main() {
 	router := gin.Default()
 
@@ -2055,9 +2046,9 @@ func main() {
 
 ### Support Let's Encrypt
 
-example for 1-line LetsEncrypt HTTPS servers.
+例如单线LetsEncrypt HTTPS服务器。
 
-```
+```go
 package main
 
 import (
@@ -2080,9 +2071,9 @@ func main() {
 }
 ```
 
-example for custom autocert manager.
+自定义自动证书管理器的示例。
 
-```
+```go
 package main
 
 import (
