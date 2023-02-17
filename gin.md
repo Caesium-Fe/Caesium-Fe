@@ -335,6 +335,7 @@ func main() {
 		msg.Name = "小王子"
 		msg.Message = "Hello world!"
 		msg.Age = 18
+         // 注意这里输出的是结构体里的user不是name了
 		c.JSON(http.StatusOK, msg)
 	})
 	r.Run(":8080")
@@ -2103,11 +2104,11 @@ func main() {
 }
 ```
 
-### Run multiple service using Gin
+### 使用Gin运行多个服务
 
 See the [question](https://github.com/gin-gonic/gin/issues/346) and try the following example:
 
-```
+```go
 package main
 
 import (
@@ -2192,32 +2193,32 @@ func main() {
 }
 ```
 
-### Graceful shutdown or restart
+### Gin优雅地重启或停止
 
-There are a few approaches you can use to perform a graceful shutdown or restart. You can make use of third-party packages specifically built for that, or you can manually do the same with the functions and methods from the built-in packages.
+有几种方法可以用于执行优雅的关机或重新启动。您可以使用专门为此构建的第三方包，也可以手动使用内置包中的函数和方法。
 
-#### Third-party packages
+#### 第三方软件包
 
 We can use [fvbock/endless](https://github.com/fvbock/endless) to replace the default `ListenAndServe`. Refer to issue [#296](https://github.com/gin-gonic/gin/issues/296) for more details.
 
-```
+```go
 router := gin.Default()
 router.GET("/", handler)
 // [...]
 endless.ListenAndServe(":4242", router)
 ```
 
-Alternatives:
+选择：
 
-- [manners](https://github.com/braintree/manners): A polite Go HTTP server that shuts down gracefully.
-- [graceful](https://github.com/tylerb/graceful): Graceful is a Go package enabling graceful shutdown of an http.Handler server.
-- [grace](https://github.com/facebookgo/grace): Graceful restart & zero downtime deploy for Go servers.
+- [manners](https://github.com/braintree/manners) : 可以优雅关机的 Go Http 服务器。
+- [graceful](https://github.com/tylerb/graceful) : Graceful是一个 Go 扩展包，可以优雅地关闭 http.Handler 服务器。
+- [grace](https://github.com/facebookgo/grace) : Go 服务器平滑重启和零停机时间部署。
 
 #### Manually
 
-In case you are using Go 1.8 or a later version, you may not need to use those libraries. Consider using `http.Server`'s built-in [Shutdown()](https://golang.org/pkg/net/http/#Server.Shutdown) method for graceful shutdowns. The example below describes its usage, and we've got more examples using gin [here](https://github.com/gin-gonic/examples/tree/master/graceful-shutdown).
+如果你使用的是 Go 1.8，可以不需要这些库！考虑使用 `http.Server` 内置的 `Shutdown()` 方法优雅地关机. 请参阅 gin 完整的 [graceful-shutdown](https://github.com/gin-gonic/examples/tree/master/graceful-shutdown) 示例。
 
-```
+```go
 // +build go1.8
 
 package main
@@ -2246,16 +2247,16 @@ func main() {
 		Handler: router,
 	}
 
-	// Initializing the server in a goroutine so that
-	// it won't block the graceful shutdown handling below
+	// 在goroutine中初始化服务器，以便
+	// 它不会阻碍下面优雅的关机处理
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && errors.Is(err, http.ErrServerClosed) {
 			log.Printf("listen: %s\n", err)
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shutdown the server with
-	// a timeout of 5 seconds.
+	// 等待中断信号以正常关闭服务器
+	// 超时5秒。
 	quit := make(chan os.Signal)
 	// kill (no param) default send syscall.SIGTERM
 	// kill -2 is syscall.SIGINT
@@ -2264,8 +2265,8 @@ func main() {
 	<-quit
 	log.Println("Shutting down server...")
 
-	// The context is used to inform the server it has 5 seconds to finish
-	// the request it is currently handling
+	// 上下文用于通知服务器它有5秒的时间完成
+	// 它当前正在处理的请求
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -2277,11 +2278,11 @@ func main() {
 }
 ```
 
-### Build a single binary with templates
+### 使用模板构建单个二进制文件
 
-You can build a server into a single binary containing templates by using [go-assets](https://github.com/jessevdk/go-assets).
+您可以使用[go assets](https://github.com/jessevdk/go-assets)将服务器构建为包含模板的单个二进制文件.
 
-```
+```go
 func main() {
 	r := gin.New()
 
@@ -2320,11 +2321,11 @@ func loadTemplate() (*template.Template, error) {
 
 See a complete example in the `https://github.com/gin-gonic/examples/tree/master/assets-in-binary` directory.
 
-### Bind form-data request with custom struct
+### 将表单数据请求与自定义结构绑定
 
 The follow example using custom struct:
 
-```
+```go
 type StructA struct {
     FieldA string `form:"field_a"`
 }
@@ -2394,11 +2395,11 @@ $ curl "http://localhost:8080/getd?field_x=hello&field_d=world"
 {"d":"world","x":{"FieldX":"hello"}}
 ```
 
-### Try to bind body into different structs
+### 尝试将主体绑定到不同的结构中
 
-The normal methods for binding request body consumes `c.Request.Body` and they cannot be called multiple times.
+绑定请求体的常规方法使用`c.request.body`，不能多次调用。
 
-```
+```go
 type formA struct {
   Foo string `json:"foo" xml:"foo" binding:"required"`
 }
@@ -2424,7 +2425,7 @@ func SomeHandler(c *gin.Context) {
 
 For this, you can use `c.ShouldBindBodyWith`.
 
-```
+```go
 func SomeHandler(c *gin.Context) {
   objA := formA{}
   objB := formB{}
@@ -2443,12 +2444,12 @@ func SomeHandler(c *gin.Context) {
 }
 ```
 
-- `c.ShouldBindBodyWith` stores body into the context before binding. This has a slight impact to performance, so you should not use this method if you are enough to call binding at once.
-- This feature is only needed for some formats -- `JSON`, `XML`, `MsgPack`, `ProtoBuf`. For other formats, `Query`, `Form`, `FormPost`, `FormMultipart`, can be called by `c.ShouldBind()` multiple times without any damage to performance (See [#1341](https://github.com/gin-gonic/gin/pull/1341)).
+- `c.ShouldBindBodyWith`在绑定之前将主体存储到上下文中。这对性能有轻微的影响，因此如果您足以立即调用绑定，则不应使用此方法。
+- 此功能仅适用于某些格式  -- `JSON`, `XML`, `MsgPack`, `ProtoBuf`. For other formats, `Query`, `Form`, `FormPost`, `FormMultipart`, 可以由调用 `c.ShouldBind()` 多次而不会对性能造成任何损害 (See [#1341](https://github.com/gin-gonic/gin/pull/1341)).
 
-### Bind form-data request with custom struct and custom tag
+### 将表单数据请求与自定义结构和自定义标记绑定
 
-```
+```go
 const (
 	customerTag = "url"
 	defaultMemory = 32 << 20
@@ -2501,11 +2502,11 @@ func ListHandler(s *Service) func(ctx *gin.Context) {
 }
 ```
 
-### http2 server push
+### http2服务器推送
 
 http.Pusher is supported only **go1.8+**. See the [golang blog](https://blog.golang.org/h2push) for detail information.
 
-```
+```go
 package main
 
 import (
@@ -2550,19 +2551,19 @@ func main() {
 }
 ```
 
-### Define format for the log of routes
+### 定义路线日志的格式
 
 The default log of routes is:
 
-```
-[GIN-debug] POST   /foo                      --> main.main.func1 (3 handlers)
-[GIN-debug] GET    /bar                      --> main.main.func2 (3 handlers)
-[GIN-debug] GET    /status                   --> main.main.func3 (3 handlers)
+```go
+[GIN-debug] POST   /foo    --> main.main.func1 (3 handlers)
+[GIN-debug] GET    /bar    --> main.main.func2 (3 handlers)
+[GIN-debug] GET    /status --> main.main.func3 (3 handlers)
 ```
 
-If you want to log this information in given format (e.g. JSON, key values or something else), then you can define this format with `gin.DebugPrintRouteFunc`. In the example below, we log all routes with standard log package but you can use another log tools that suits of your needs.
+如果您希望以给定格式（例如JSON、键值或其他格式）记录此信息，则可以使用“gin.DebugPrintRouteFunc”定义此格式。在下面的示例中，我们使用标准日志包记录所有路由，但您可以使用适合您需要的其他日志工具。
 
-```
+```go
 import (
 	"log"
 	"net/http"
@@ -2593,9 +2594,9 @@ func main() {
 }
 ```
 
-### Set and get a cookie
+### 设置并获取cookie
 
-```
+```go
 import (
     "fmt"
 
@@ -2630,7 +2631,11 @@ Use function `SetTrustedProxies()` on your `gin.Engine` to specify network addre
 
 **Attention:** Gin trust all proxies by default if you don't specify a trusted proxy using the function above, **this is NOT safe**. At the same time, if you don't use any proxy, you can disable this feature by using `Engine.SetTrustedProxies(nil)`, then `Context.ClientIP()` will return the remote address directly to avoid some unnecessary computation.
 
-```
+Gin允许您指定保存真实客户端IP（如果有的话）的标头，以及指定您信任哪些代理（或直接客户端）来指定其中一个标头。
+使用“gin.Engine”上的函数“SetTrustedProxies（）”指定网络地址或网络CIDR，从中可以信任与客户端IP相关的客户端请求标头。它们可以是IPv4地址、IPv4 CIDR、IPv6地址或IPv6 CIDR。
+**注意：**如果您没有使用上述函数指定受信任的代理，则默认情况下Gin信任所有代理，**这是不安全的**。同时，如果不使用任何代理，可以使用“Engine.SetTrustedProxies（nil）”禁用此功能，然后“Context.ClientIP（）”将直接返回远程地址，以避免一些不必要的计算。
+
+```go
 import (
 	"fmt"
 
@@ -2655,7 +2660,9 @@ func main() {
 
 **Notice:** If you are using a CDN service, you can set the `Engine.TrustedPlatform` to skip TrustedProxies check, it has a higher priority than TrustedProxies. Look at the example below:
 
-```
+**Notice:** 如果您正在使用CDN服务，可以将“Engine.TrustedPlatform”设置为跳过TrustedProxies检查，它的优先级高于TrustedProxies。查看以下示例：
+
+```go
 import (
 	"fmt"
 
@@ -2667,8 +2674,8 @@ func main() {
 	router := gin.Default()
 	// Use predefined header gin.PlatformXXX
 	router.TrustedPlatform = gin.PlatformGoogleAppEngine
-	// Or set your own trusted request header for another trusted proxy service
-	// Don't set it to any suspect request header, it's unsafe
+	// 或者为另一个受信任的代理服务设置自己的受信任请求标头
+	// 不要将其设置为任何可疑请求标头，这是不安全的
 	router.TrustedPlatform = "X-CDN-IP"
 
 	router.GET("/", func(c *gin.Context) {
@@ -2684,7 +2691,7 @@ func main() {
 
 The `net/http/httptest` package is preferable way for HTTP testing.
 
-```
+```go
 package main
 
 import (
@@ -2709,7 +2716,7 @@ func main() {
 
 Test for code example above:
 
-```
+```go
 package main
 
 import (
@@ -2734,19 +2741,15 @@ func TestPingRoute(t *testing.T) {
 
 ## Users
 
-Awesome project lists using [Gin](https://github.com/gin-gonic/gin) web framework.
+使用[Gin](https://github.com/gin-gonic/gin)的很棒的项目列表web框架。
 
-- [gorush](https://github.com/appleboy/gorush): A push notification server written in Go.
-- [fnproject](https://github.com/fnproject/fn): The container native, cloud agnostic serverless platform.
-- [photoprism](https://github.com/photoprism/photoprism): Personal photo management powered by Go and Google TensorFlow.
-- [krakend](https://github.com/devopsfaith/krakend): Ultra performant API Gateway with middlewares.
-- [picfit](https://github.com/thoas/picfit): An image resizing server written in Go.
-- [brigade](https://github.com/brigadecore/brigade): Event-based Scripting for Kubernetes.
-- [dkron](https://github.com/distribworks/dkron): Distributed, fault tolerant job scheduling system.
-
-
-
-
+- [gorush](https://github.com/appleboy/gorush)：Go中写入的推送通知服务器。
+- [fnproject](https://github.com/fnproject/fn)：容器本机、不可知云的无服务器平台。
+- [photoprism](https://github.com/photoprism/photoprism)：由Go和Google TensorFlow支持的个人照片管理。
+- [krakend](https://github.com/devopsfaith/krakend)：具有中间件的超性能API网关。
+- [picfit](https://github.com/thoas/picfit)：Go中写入的图像调整服务器。
+- [brigade](https://github.com/brigadecore/brigade)：Kubernetes基于事件的脚本。
+- [dkron](https://github.com/distribworks/dkron)：分布式容错作业调度系统。
 
 ## 运行多个服务
 

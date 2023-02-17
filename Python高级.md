@@ -1077,7 +1077,7 @@ python3 manage.py migrate TestModel   # 创建表结构
 
 需要对应的urls文件中进行对该models脚本文件进行配置
 
-### Django 中 Cookie 的语法
+## Django 中 Cookie 的语法
 
 设置 cookie:
 
@@ -1095,9 +1095,142 @@ request.COOKIES.get(key)
 删除 cookie:
 
 ```
-rep =HttpResponse || render || redirect 
+rep = HttpResponse || render || redirect 
 rep.delete_cookie(key)
 ```
+
+## Django 中使用Redis
+
+### 1.安装django-redis库
+
+### 2.配置
+
+打开Django的配置文件，比如说setting.py，里面设置CACHES项
+
+```django
+CACHES = {
+	"default" : {
+		"BACKEND" : "django_redis.cache.RedisCache",
+		"LOCATION" : "redis://127.0.0.1:6379/1",
+		"OPTIONS" : {
+			"CLIENT_CLASS" : "django_redis.client.Defaultclient",
+		}
+	}
+}
+```
+
+一个CACHES里可以配置多个redis连接信息，每一个都有自己的别名（alias），上面的“default”就是别名，到时候可以通过不同别名连接不同redis数据库
+
+LOCATION是连接的信息，包括ip端口用户密码等，如果不需要用户密码则可以省略不写，django-redis支持三种连接协议，如下
+
+| 协议      | 说明                   | 举例                                                     |
+| --------- | ---------------------- | -------------------------------------------------------- |
+| redis://  | 普通的TCP套接字连接    | redis://[[username]:[password]]@localhost:6379/0         |
+| rediss    | SSL方式的TCP套接字连接 | rediss://[[username]:[password]]@localhost:6379/0        |
+| rediss:// | Unix域套接字连接       | unix://[[username]:[password]]@/path/to/socket.sock?db=0 |
+
+### 3.使用redis存储session
+
+Django默认的Session是存储在sql数据库中，但我们都知道普通的数据会被数据存储在硬盘上，速度没有那么快，如果想改成存储在redis中，只需要在配置文件中修改
+
+```django
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+```
+
+### 4.redis连接超时时间设置
+
+连接超时的秒数可以在配置项里设置，SOCKET_CONNECT_TIMEOUT表示连接redis的超时时间，SOCKET_TIMEOUT表示使用redis进行读写操作超时时间
+
+```django
+CACHES = {
+	"default" ： {
+		"OPTIONS" : {
+			"SOCKET_CONNECT_TIMEOUT" : 5,  # 连接redis超时时间
+			"SOCKET_TIMEOUT" : 5,  # redis读写操作超时时间
+		}
+	}
+}
+```
+
+4.使用redis
+4.1 使用默认redis
+如果你想使用默认的redis，也就是在配置文件里设置的别名为“default”的redis，可以引用django.core.cache里的cache
+
+```python
+from django.core.cache import cache
+
+cache.set("name", "冰冷的希望", timeout=None)
+print(cache.get("name"))
+```
+
+4.2 使用指定redis（原生redis）
+当你在配置文件里写了多个redis连接，可以通过别名指定要使用哪个redis
+
+```python
+from django_redis import get_redis_connection
+
+redis_conn = get_redis_connection("chain_info")
+redis_conn.set("name", "icy_hope")
+print(redis_conn.get("name"))
+```
+
+要注意，通过get_redis_connection()获取得到的客户端是原生Redis客户端，虽然基本上支持所有的原生redis命令，但它返回的数据是byte类型，你需要自己decode
+
+5.连接池
+使用连接池的好处是不用管理连接对象，它会自动创建一些连接对象并且尽可能重复使用，所以相当来说性能会好一点
+
+5.1 配置连接池
+要使用连接池，首先要在Django的配置文件里写上连接池的最大连接数
+
+```django
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        ...
+        "OPTIONS": {
+            "CONNECTION_POOL_KWARGS": {"max_connections": 100}
+        }
+    }
+}
+```
+
+5.2 使用连接池
+我们可以通过连接别名确定要使用哪个redis，然后正常执行命令就行，我们不用在乎它创建了哪些连接实例，但你可以通过connection_pool的_created_connections属性查看当前创建了多少个连接实例
+
+```python
+from django_redis import get_redis_connection
+
+redis_conn = get_redis_connection("default")
+redis_conn.set("name", "冰冷的希望")
+print(redis_conn.get("name"))
+
+# 查看目前已创建的连接数量
+connection_pool = redis_conn.connection_pool
+print(connection_pool._created_connections)
+```
+
+5.3 自定义连接池
+Django-redis默认的连接的类是DefaultClient，如果你有更高的定制需求，可以新建一个自己的类，继承ConnectionPool
+
+```python
+from redis.connection import ConnectionPool
+
+class MyPool(ConnectionPool):
+    pass
+```
+
+有了这个类之后还需要在Django的配置文件里指定它
+
+```django
+"OPTIONS": {
+    "CONNECTION_POOL_CLASS": "XXX.XXX.MyPool",
+}
+```
+
+
+
+
 
 ## Django中的Middleware
 
