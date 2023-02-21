@@ -125,6 +125,23 @@ print(countdown(5).__next()) # 5
 # 每次输出都是一样，说明每次都是不同的生成器
 ```
 
+```python
+# 除了上述的next方法，还有send方法，send是在需要传递参数时使用的
+def func():
+	print("asd")
+	yield  # 这里第一次不能使用send传参数
+	while True:
+		s = yield
+		print(s)
+
+s = func()
+s.__next__()
+s.send(1)
+
+```
+
+
+
 ## random库
 
 关于`random`的一个小练习，写一个生成4位随机验证码（包含数字和字母）的小程序：
@@ -1016,225 +1033,7 @@ cursor.fetchmany()获取查询结果集中的下一行组数据，返回一个�
 
 cursor.fetchall()获取查询结果集中所有的数据行，返回一个列表。
 
-# Django框架学习
 
-django的版本选取需要结合python环境版本来抉择，对应关系为：
-
-| Django version | Python versions                                 |
-| :------------- | :---------------------------------------------- |
-| 1.8            | 2.7, 3.2 (until the end of 2016), 3.3, 3.4, 3.5 |
-| 1.9, 1.10      | 2.7, 3.4, 3.5                                   |
-| 1.11           | 2.7, 3.4, 3.5, 3.6                              |
-| 2.0            | 3.4, 3.5, 3.6                                   |
-| 2.1            | 3.5, 3.6, 3.7                                   |
-
-```shell
-# django项目创建命令：
-django-admin startproject xxxxxxxx(项目名)
-# django创建app
-python manage.py startapp xxxxxxxx(app名)
-# django服务启动
-python manage.py runserver
-```
-
-项目框架的文件管理关系为：
-
-项目名称
-	默认项目文件夹[配置,路由等文件]
-	功能文件夹[可为多个]
-	static文件夹[存放前端js,css]
-	templates[存放html]
-	db文件
-	manage.py管理文件
-	
-功能文件夹中用于填写model模型和views功能。
-
-## url配置问题根据django的版本来：
-
-Django1.1.x 版本：使用url()：普通路径和正则路径均可使用，需要自己手动添加正则首位限制符号。
-
-2.2.x之后的版本：path：用于普通路径，不需要自己手动添加正则首位限制符号，底层已经添加。re_path：用于正则路径，需要自己手动添加正则首位限制符号。
-
-总结：Django1.1.x 版本中的 url 和 Django 2.2.x 版本中的 re_path 用法相同。
-
-## Django的模板语法：
-
-view：｛"HTML变量名" : "views变量名"｝
-
-HTML：｛｛变量名｝｝
-
-Django的模型：在app文件夹中创建models脚本，在脚本中引用django.db库中的models类，用ORM语法创建数据库表字段，然后用命令执行
-
-## 命令如下：
-
-python3 manage.py migrate   # 创建表结构
-
-python3 manage.py makemigrations TestModel  # 让 Django 知道我们在我们的模型有一些变更
-
-python3 manage.py migrate TestModel   # 创建表结构
-
-会自动添加id字段作为主键
-
-需要对应的urls文件中进行对该models脚本文件进行配置
-
-## Django 中 Cookie 的语法
-
-设置 cookie:
-
-```django
-rep.set_cookie(key,value,...) 
-rep.set_signed_cookie(key,value,salt='加密盐',...)
-```
-
-获取 cookie:
-
-```
-request.COOKIES.get(key)
-```
-
-删除 cookie:
-
-```
-rep = HttpResponse || render || redirect 
-rep.delete_cookie(key)
-```
-
-## Django 中使用Redis
-
-### 1.安装django-redis库
-
-### 2.配置
-
-打开Django的配置文件，比如说setting.py，里面设置CACHES项
-
-```django
-CACHES = {
-	"default" : {
-		"BACKEND" : "django_redis.cache.RedisCache",
-		"LOCATION" : "redis://127.0.0.1:6379/1",
-		"OPTIONS" : {
-			"CLIENT_CLASS" : "django_redis.client.Defaultclient",
-		}
-	}
-}
-```
-
-一个CACHES里可以配置多个redis连接信息，每一个都有自己的别名（alias），上面的“default”就是别名，到时候可以通过不同别名连接不同redis数据库
-
-LOCATION是连接的信息，包括ip端口用户密码等，如果不需要用户密码则可以省略不写，django-redis支持三种连接协议，如下
-
-| 协议      | 说明                   | 举例                                                     |
-| --------- | ---------------------- | -------------------------------------------------------- |
-| redis://  | 普通的TCP套接字连接    | redis://[[username]:[password]]@localhost:6379/0         |
-| rediss    | SSL方式的TCP套接字连接 | rediss://[[username]:[password]]@localhost:6379/0        |
-| rediss:// | Unix域套接字连接       | unix://[[username]:[password]]@/path/to/socket.sock?db=0 |
-
-### 3.使用redis存储session
-
-Django默认的Session是存储在sql数据库中，但我们都知道普通的数据会被数据存储在硬盘上，速度没有那么快，如果想改成存储在redis中，只需要在配置文件中修改
-
-```django
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
-```
-
-### 4.redis连接超时时间设置
-
-连接超时的秒数可以在配置项里设置，SOCKET_CONNECT_TIMEOUT表示连接redis的超时时间，SOCKET_TIMEOUT表示使用redis进行读写操作超时时间
-
-```django
-CACHES = {
-	"default" ： {
-		"OPTIONS" : {
-			"SOCKET_CONNECT_TIMEOUT" : 5,  # 连接redis超时时间
-			"SOCKET_TIMEOUT" : 5,  # redis读写操作超时时间
-		}
-	}
-}
-```
-
-4.使用redis
-4.1 使用默认redis
-如果你想使用默认的redis，也就是在配置文件里设置的别名为“default”的redis，可以引用django.core.cache里的cache
-
-```python
-from django.core.cache import cache
-
-cache.set("name", "冰冷的希望", timeout=None)
-print(cache.get("name"))
-```
-
-4.2 使用指定redis（原生redis）
-当你在配置文件里写了多个redis连接，可以通过别名指定要使用哪个redis
-
-```python
-from django_redis import get_redis_connection
-
-redis_conn = get_redis_connection("chain_info")
-redis_conn.set("name", "icy_hope")
-print(redis_conn.get("name"))
-```
-
-要注意，通过get_redis_connection()获取得到的客户端是原生Redis客户端，虽然基本上支持所有的原生redis命令，但它返回的数据是byte类型，你需要自己decode
-
-5.连接池
-使用连接池的好处是不用管理连接对象，它会自动创建一些连接对象并且尽可能重复使用，所以相当来说性能会好一点
-
-5.1 配置连接池
-要使用连接池，首先要在Django的配置文件里写上连接池的最大连接数
-
-```django
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        ...
-        "OPTIONS": {
-            "CONNECTION_POOL_KWARGS": {"max_connections": 100}
-        }
-    }
-}
-```
-
-5.2 使用连接池
-我们可以通过连接别名确定要使用哪个redis，然后正常执行命令就行，我们不用在乎它创建了哪些连接实例，但你可以通过connection_pool的_created_connections属性查看当前创建了多少个连接实例
-
-```python
-from django_redis import get_redis_connection
-
-redis_conn = get_redis_connection("default")
-redis_conn.set("name", "冰冷的希望")
-print(redis_conn.get("name"))
-
-# 查看目前已创建的连接数量
-connection_pool = redis_conn.connection_pool
-print(connection_pool._created_connections)
-```
-
-5.3 自定义连接池
-Django-redis默认的连接的类是DefaultClient，如果你有更高的定制需求，可以新建一个自己的类，继承ConnectionPool
-
-```python
-from redis.connection import ConnectionPool
-
-class MyPool(ConnectionPool):
-    pass
-```
-
-有了这个类之后还需要在Django的配置文件里指定它
-
-```django
-"OPTIONS": {
-    "CONNECTION_POOL_CLASS": "XXX.XXX.MyPool",
-}
-```
-
-
-
-
-
-## Django中的Middleware
-
-https://m.runoob.com/django/django-middleware.html
 
 # Flask框架
 

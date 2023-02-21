@@ -214,7 +214,7 @@ print(value)
 ```python
 安装: pip install django-redis
 
-使用：
+在views里使用：
 
 from django_redis import get_redis_connection
 def login(request):
