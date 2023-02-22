@@ -36,29 +36,6 @@ python manage.py runserver
 	
 功能文件夹中用于填写model模型和views功能。
 
-## url配置问题根据django的版本来：
-
-Django1.1.x 版本：使用url()：普通路径和正则路径均可使用，需要自己手动添加正则首位限制符号。
-
-2.2.x之后的版本：path：用于普通路径，不需要自己手动添加正则首位限制符号，底层已经添加。re_path：用于正则路径，需要自己手动添加正则首位限制符号。
-
-总结：Django1.1.x 版本中的 url 和 Django 2.2.x 版本中的 re_path 用法相同。
-
-## path() 函数
-
-Django path() 可以接收四个参数，分别是两个必选参数：route、view 和两个可选参数：kwargs、name。
-
-语法格式：
-
-```
-path(route, view, kwargs=None, name=None)
-```
-
-- route: 字符串，表示 URL 规则，与之匹配的 URL 会执行对应的第二个参数 view。
-- view: 用于执行与正则表达式匹配的 URL 请求。
-- kwargs: 视图使用的字典类型的参数。
-- name: 用来反向获取 URL。
-
 ## Django的模板语法：
 
 view：｛"HTML变量名" : "views变量名"｝
@@ -239,7 +216,7 @@ def testdb(request):
 我们在之前的项目中创建一个 search.py 文件，用于接收用户的请求：
 
 ```python
-# HelloWorld/HelloWorld/search.py 文件代码：
+# ProjectName/ProjectName/search.py 文件代码：
 from django.http import HttpResponse
 from django.shortcuts import render
 # 表单
@@ -259,7 +236,7 @@ def search(request):
 在模板目录 templates 中添加 search_form.html 表单：
 
 ```html
-HelloWorld/templates/search_form.html 文件代码：
+<!--ProjectName/templates/search_form.html 文件代码：-->
 <!DOCTYPE html>
 <html>
 <head>
@@ -278,7 +255,7 @@ HelloWorld/templates/search_form.html 文件代码：
 urls.py 规则修改为如下形式：
 
 ```python
-# HelloWorld/HelloWorld/urls.py 文件代码：
+# ProjectName/ProjectName/urls.py 文件代码：
 from django.conf.urls import url
 from . import views,testdb,search
  
@@ -299,7 +276,7 @@ urlpatterns = [
 我们在 templates 创建 post.html：
 
 ```html
-/HelloWorld/templates/post.html 文件代码：
+<!--ProjectName/templates/post.html 文件代码：-->
 <!DOCTYPE html>
 <html>
 <head>
@@ -325,7 +302,7 @@ urlpatterns = [
 在HelloWorld目录下新建 search2.py 文件并使用 search_post 函数来处理 POST 请求：
 
 ```python
-# HelloWorld/HelloWorld/search2.py 文件代码：
+# ProjectName/ProjectName/search2.py 文件代码：
 # -*- coding: utf-8 -*-
  
 from django.shortcuts import render
@@ -342,7 +319,7 @@ def search_post(request):
 urls.py 规则修改为如下形式：
 
 ```python
-# HelloWorld/HelloWorld/urls.py 文件代码：
+# ProjectName/ProjectName/urls.py 文件代码：
 from django.conf.urls import url
 from . import views,testdb,search,search2
  
@@ -636,6 +613,479 @@ render 和 redirect 是在 HttpResponse 的基础上进行了封装：
 
 - render：底层返回的也是 HttpResponse 对象
 - redirect：底层继承的是 HttpResponse 对象
+
+# Django 路由
+
+路由简单的来说就是根据用户请求的 URL 链接来判断对应的处理程序，并返回处理结果，也就是 URL 与 Django 的视图建立映射关系。
+
+Django 路由在 urls.py 配置，urls.py 中的每一条配置对应相应的处理方法。
+
+**url() 方法**：普通路径和正则路径均可使用，需要自己手动添加正则首位限制符号。
+
+**path**：用于普通路径，不需要自己手动添加正则首位限制符号，底层已经添加。
+
+**re_path**：用于正则路径，需要自己手动添加正则首位限制符号。
+
+## 正则路径中的分组
+
+### 正则路径中的无名分组
+
+无名分组按位置传参，一一对应。
+
+views 中除了 request，其他形参的数量要与 urls 中的分组数量一致。
+
+### 正则路径中的有名分组
+
+语法： (?P<组名>正则表达式)
+
+有名分组按关键字传参，与位置顺序无关。
+
+views 中除了 request，其他形参的数量要与 urls 中的分组数量一致， 并且 views 中的形参名称要与 urls 中的组名对应。
+
+#### 路由分发(include)
+
+**存在问题**：Django 项目里多个app目录共用一个 urls 容易造成混淆，后期维护也不方便。
+
+**解决**：使用路由分发（include），让每个app目录都单独拥有自己的 urls。
+
+**步骤：**
+
+- 1、在每个 app 目录里都创建一个 urls.py 文件。
+- 2、在项目名称目录下的 urls 文件里，统一将路径分发给各个 app 目录。
+
+```python
+# 实例
+from django.contrib import admin
+from django.urls import path,include # 从 django.urls 引入 include
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path("app01/", include("app01.urls")),
+    path("app02/", include("app02.urls")),
+]
+```
+
+## 反向解析
+
+随着功能的增加，路由层的 url 发生变化，就需要去更改对应的视图层和模板层的 url，非常麻烦，不便维护。
+
+这时我们可以利用反向解析，当路由层 url 发生改变，在视图层和模板层动态反向解析出更改后的 url，免去修改的操作。
+
+反向解析一般用在模板中的超链接及视图中的重定向。
+
+### 普通路径
+
+在 urls.py 中给路由起别名，**name="路由别名"**。
+
+```
+path("login1/", views.login, name="login")
+```
+
+在 views.py 中，从 django.urls 中引入 reverse，利用 **reverse("路由别名")** 反向解析:
+
+```
+return redirect(reverse("login"))
+```
+
+在模板 templates 中的 HTML 文件中，利用 **{% url "路由别名" %}** 反向解析。
+
+```
+<form action="{% url 'login' %}" method="post"> 
+```
+
+### 正则路径（无名分组）
+
+在 urls.py 中给路由起别名，**name="路由别名"**。
+
+```
+re_path(r"^login/([0-9]{2})/$", views.login, name="login")
+```
+
+在 views.py 中，从 django.urls 中引入 reverse，利用 **reverse("路由别名"，args=(符合正则匹配的参数,))** 反向解析。
+
+```
+return redirect(reverse("login",args=(10,)))
+```
+
+在模板 templates 中的 HTML 文件中利用 **{% url "路由别名" 符合正则匹配的参数 %}** 反向解析。
+
+```
+<form action="{% url 'login' 10 %}" method="post"> 
+```
+
+### 正则路径（有名分组）
+
+在 urls.py 中给路由起别名，**name="路由别名"**。
+
+```
+re_path(r"^login/(?P<year>[0-9]{4})/$", views.login, name="login")
+```
+
+在 views.py 中，从 django.urls 中引入 reverse，利用 **reverse("路由别名"，kwargs={"分组名":符合正则匹配的参数})** 反向解析。
+
+```
+return redirect(reverse("login",kwargs={"year":3333}))
+```
+
+在模板 templates 中的 HTML 文件中，利用 **{% url "路由别名" 分组名=符合正则匹配的参数 %}** 反向解析。
+
+```
+<form action="{% url 'login' year=3333 %}" method="post">
+```
+
+## 命名空间
+
+命名空间（英语：Namespace）是表示标识符的可见范围。
+
+一个标识符可在多个命名空间中定义，它在不同命名空间中的含义是互不相干的。
+
+一个新的命名空间中可定义任何标识符，它们不会与任何重复的标识符发生冲突，因为重复的定义都处于其它命名空间中。
+
+**存在问题：**路由别名 name 没有作用域，Django 在反向解析 URL 时，会在项目全局顺序搜索，当查找到第一个路由别名 name 指定 URL 时，立即返回。当在不同的 app 目录下的urls 中定义相同的路由别名 name 时，可能会导致 URL 反向解析错误。
+
+**解决：**使用命名空间。
+
+### 普通路径
+
+定义命名空间（include 里面是一个元组）格式如下：
+
+```
+include(("app名称：urls"，"app名称"))
+```
+
+实例：
+
+```
+path("app01/", include(("app01.urls","app01"))) 
+path("app02/", include(("app02.urls","app02")))
+```
+
+在 app01/urls.py 中起相同的路由别名。
+
+```
+path("login/", views.login, name="login")
+```
+
+在 views.py 中使用名称空间，语法格式如下：
+
+```
+reverse("app名称：路由别名")
+```
+
+实例：
+
+```
+return redirect(reverse("app01:login")
+```
+
+在 templates 模板的 HTML 文件中使用名称空间，语法格式如下：
+
+```
+{% url "app名称：路由别名" %}
+```
+
+实例：
+
+```
+<form action="{% url 'app01:login' %}" method="post">
+```
+
+# Django Admin 管理工具
+
+Django 提供了基于 web 的管理工具。
+
+Django 自动管理工具是 django.contrib 的一部分。你可以在项目的 settings.py 中的 INSTALLED_APPS 看到它：
+
+```python
+# ProjectName/ProjectName/settings.py 文件代码：
+INSTALLED_APPS = (
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+)
+```
+
+django.contrib是一套庞大的功能集，它是Django基本代码的组成部分。
+
+------
+
+## 激活管理工具
+
+通常我们在生成项目时会在 urls.py 中自动设置好，我们只需去掉注释即可。
+
+配置项如下所示：
+
+```python
+# ProjectName/ProjectName/urls.py 文件代码：
+# urls.py
+from django.conf.urls import url
+from django.contrib import admin
+ 
+urlpatterns = [
+    url(r'^admin/', admin.site.urls),
+]
+```
+
+当这一切都配置好后，Django 管理工具就可以运行了。
+
+------
+
+## 使用管理工具
+
+启动开发服务器，然后在浏览器中访问 http://127.0.0.1:8000/admin/，得到默认的管理界面。
+
+你可以通过命令 **python manage.py createsuperuser** 来创建超级用户，如下所示：
+
+```shell
+# python manage.py createsuperuser
+Username (leave blank to use 'root'): admin
+Email address: admin@runoob.com
+Password:
+Password (again):
+Superuser created successfully.
+[root@solar HelloWorld]#
+```
+
+为了让 admin 界面管理某个数据模型，我们需要先注册该数据模型到 admin。比如，我们之前在 TestModel 中已经创建了模型 Test 。修改 TestModel/admin.py:
+
+```python
+# ProjectName/TestModel/admin.py: 文件代码：
+
+from django.contrib import admin
+from TestModel.models import Test
+ 
+# Register your models here.
+admin.site.register(Test)
+```
+
+刷新后即可看到 Testmodel 数据表在界面上显示。
+
+## 复杂模型
+
+管理页面的功能强大，完全有能力处理更加复杂的数据模型。
+
+先在 TestModel/models.py 中增加一个更复杂的数据模型：
+
+```python
+# ProjectName/TestModel/models.py: 文件代码：
+
+from django.db import models
+ 
+# Create your models here.
+class Test(models.Model):
+    name = models.CharField(max_length=20)
+ 
+class Contact(models.Model):
+    name   = models.CharField(max_length=200)
+    age    = models.IntegerField(default=0)
+    email  = models.EmailField()
+    def __unicode__(self):
+        return self.name
+ 
+class Tag(models.Model):
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE,)
+    name    = models.CharField(max_length=50)
+    def __unicode__(self):
+        return self.name
+```
+
+这里有两个表。Tag 以 Contact 为外部键。一个 Contact 可以对应多个 Tag。
+
+我们还可以看到许多在之前没有见过的属性类型，比如 IntegerField 用于存储整数。
+
+在 TestModel/admin.py 注册多个模型并显示：
+
+```python
+# ProjectName/TestModel/admin.py: 文件代码：
+from django.contrib import admin
+from TestModel.models import Test,Contact,Tag
+ 
+# Register your models here.
+admin.site.register([Test, Contact, Tag])
+```
+
+在以上管理工具我们就能进行复杂模型操作。
+
+如果你之前还未创建表结构，可使用以下命令创建：
+
+```shell
+$ python manage.py makemigrations TestModel  # 让 Django 知道我们在我们的模型有一些变更
+$ python manage.py migrate TestModel   # 创建表结构
+```
+
+## 自定义表单
+
+我们可以自定义管理页面，来取代默认的页面。比如上面的 "add" 页面。我们想只显示 name 和 email 部分。修改 TestModel/admin.py:
+
+```python
+# ProjectName/TestModel/admin.py: 文件代码：
+from django.contrib import admin
+from TestModel.models import Test,Contact,Tag
+ 
+# Register your models here.
+class ContactAdmin(admin.ModelAdmin):
+    fields = ('name', 'email')
+ 
+admin.site.register(Contact, ContactAdmin)
+admin.site.register([Test, Tag])
+```
+
+以上代码定义了一个 ContactAdmin 类，用以说明管理页面的显示格式。
+
+里面的 fields 属性定义了要显示的字段。
+
+由于该类对应的是 Contact 数据模型，我们在注册的时候，需要将它们一起注册。
+
+我们还可以将输入栏分块，每个栏也可以定义自己的格式。修改 TestModel/admin.py为：
+
+```python
+# ProjectName/TestModel/admin.py: 文件代码：
+from django.contrib import admin
+from TestModel.models import Test,Contact,Tag
+ 
+# Register your models here.
+class ContactAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ['Main',{
+            'fields':('name','email'),
+        }],
+        ['Advance',{
+            'classes': ('collapse',), # CSS
+            'fields': ('age',),
+        }]
+    )
+ 
+admin.site.register(Contact, ContactAdmin)
+admin.site.register([Test, Tag])
+```
+
+上面的栏目分为了 Main 和 Advance 两部分。classes 说明它所在的部分的 CSS 格式。
+
+## 内联(Inline)显示
+
+上面的 Contact 是 Tag 的外部键，所以有外部参考的关系。
+
+而在默认的页面显示中，将两者分离开来，无法体现出两者的从属关系。我们可以使用内联显示，让 Tag 附加在 Contact 的编辑页面上显示。
+
+修改TestModel/admin.py：
+
+```python
+# HelloWorld/TestModel/admin.py: 文件代码：
+from django.contrib import admin
+from TestModel.models import Test,Contact,Tag
+ 
+# Register your models here.
+class TagInline(admin.TabularInline):
+    model = Tag
+ 
+class ContactAdmin(admin.ModelAdmin):
+    inlines = [TagInline]  # Inline
+    fieldsets = (
+        ['Main',{
+            'fields':('name','email'),
+        }],
+        ['Advance',{
+            'classes': ('collapse',),
+            'fields': ('age',),
+        }]
+ 
+    )
+ 
+admin.site.register(Contact, ContactAdmin)
+admin.site.register([Test])
+```
+
+## 列表页的显示
+
+在 Contact 输入数条记录后
+
+我们也可以自定义该页面的显示，比如在列表中显示更多的栏目，只需要在 ContactAdmin 中增加 list_display 属性:
+
+```python
+# HelloWorld/TestModel/admin.py: 文件代码：
+from django.contrib import admin
+from TestModel.models import Test,Contact,Tag
+ 
+# Register your models here.
+class TagInline(admin.TabularInline):
+    model = Tag
+ 
+class ContactAdmin(admin.ModelAdmin):
+    list_display = ('name','age', 'email') # list
+    inlines = [TagInline]  # Inline
+    fieldsets = (
+        ['Main',{
+            'fields':('name','email'),
+        }],
+        ['Advance',{
+            'classes': ('collapse',),
+            'fields': ('age',),
+        }]
+ 
+    )
+ 
+admin.site.register(Contact, ContactAdmin)
+admin.site.register([Test])
+```
+
+搜索功能在管理大量记录时非常有，我们可以使用 search_fields 为该列表页增加搜索栏：
+
+```python
+# HelloWorld/TestModel/admin.py: 文件代码：
+from django.contrib import admin
+from TestModel.models import Test,Contact,Tag
+ 
+# Register your models here.
+class TagInline(admin.TabularInline):
+    model = Tag
+ 
+class ContactAdmin(admin.ModelAdmin):
+    list_display = ('name','age', 'email') # list
+    search_fields = ('name',)
+    inlines = [TagInline]  # Inline
+    fieldsets = (
+        ['Main',{
+            'fields':('name','email'),
+        }],
+        ['Advance',{
+            'classes': ('collapse',),
+            'fields': ('age',),
+        }]
+ 
+    )
+ 
+admin.site.register(Contact, ContactAdmin)
+admin.site.register([Test])
+```
+
+#### 问题解决
+
+```python
+Django 在根据 models 生成数据库表时报 __init__() missing 1 required positional argument: 'on_delete' 错误
+
+原因：
+
+在 django2.0 后，定义外键和一对一关系的时候需要加 on_delete 选项，此参数为了避免两个表里的数据不一致问题，不然会报错：TypeError: __init__() missing 1 required positional argument: 'on_delete'。
+
+举例说明：
+
+user=models.OneToOneField(User)owner=models.ForeignKey(UserProfile)
+需要改成：
+
+user=models.OneToOneField(User,on_delete=models.CASCADE) --在老版本这个参数（models.CASCADE）是默认值
+owner=models.ForeignKey(UserProfile,on_delete=models.CASCADE) --在老版本这个参数（models.CASCADE）是默认值参数
+说明：on_delete 有 CASCADE、PROTECT、SET_NULL、SET_DEFAULT、SET() 五个可选择的值。
+
+ CASCADE：此值设置，是级联删除。
+ PROTECT：此值设置，是会报完整性错误。
+ SET_NULL：此值设置，会把外键设置为 null，前提是允许为 null。
+ SET_DEFAULT：此值设置，会把设置为外键的默认值。
+ SET()：此值设置，会调用外面的值，可以是一个函数。一般情况下使用 CASCADE 就可以了。
+```
+
+
 
 ## Django 中 Cookie 的语法
 
