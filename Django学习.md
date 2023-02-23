@@ -551,11 +551,11 @@ QueryDict实现所有标准的词典方法。还包括一些特有的方法：
 
 视图层中有两个重要的对象：请求对象(request)与响应对象(HttpResponse)。
 
-## 请求对象: HttpRequest 对象（简称 request 对象）
+### 请求对象: HttpRequest 对象（简称 request 对象）
 
 以下介绍几个常用的 request 属性。
 
-### GET
+#### GET
 
 数据类型是 QueryDict，一个类似于字典的对象，包含 HTTP GET 的所有参数。
 
@@ -563,11 +563,11 @@ QueryDict实现所有标准的词典方法。还包括一些特有的方法：
 
 取值格式：**对象.方法**。
 
-#### get()
+##### get()
 
 返回字符串，如果该键对应有多个值，取出该键的最后一个值。
 
-### POST
+#### POST
 
 数据类型是 QueryDict，一个类似于字典的对象，包含 HTTP POST 的所有参数。
 
@@ -575,37 +575,37 @@ QueryDict实现所有标准的词典方法。还包括一些特有的方法：
 
 取值格式： **对象.方法**。
 
-#### get()
+##### get()
 
 返回字符串，如果该键对应有多个值，取出该键的最后一个值。
 
-### body
+#### body
 
 数据类型是二进制字节流，是原生请求体里的参数内容，在 HTTP 中用于 POST，因为 GET 没有请求体。
 
 在 HTTP 中不常用，而在处理非 HTTP 形式的报文时非常有用，例如：二进制图片、XML、Json 等。
 
-### path
+#### path
 
 获取 URL 中的路径部分，数据类型是字符串。
 
-### method
+#### method
 
 获取当前请求的方式，数据类型是字符串，且结果为大写。
 
-## 响应对象：HttpResponse 对象
+### 响应对象：HttpResponse 对象
 
 响应对象主要有三种形式：HttpResponse()、render()、redirect()。
 
-### HttpResponse()
+#### HttpResponse()
 
 返回文本，参数为字符串，字符串中写文本内容。如果参数为字符串里含有 html 标签，也可以渲染。
 
-### render()
+#### render()
 
 返回文本，第一个参数为 request，第二个参数为字符串（页面名称），第三个参数为字典（可选参数，向页面传递的参数：键为页面参数名，值为views参数名）。
 
-### redirect()
+#### redirect()
 
 重定向，跳转新页面。参数为字符串，字符串中填写页面路径。一般用于 form 表单提交后，跳转到新页面。
 
@@ -614,7 +614,7 @@ render 和 redirect 是在 HttpResponse 的基础上进行了封装：
 - render：底层返回的也是 HttpResponse 对象
 - redirect：底层继承的是 HttpResponse 对象
 
-# Django 路由
+## Django 路由
 
 路由简单的来说就是根据用户请求的 URL 链接来判断对应的处理程序，并返回处理结果，也就是 URL 与 Django 的视图建立映射关系。
 
@@ -626,15 +626,15 @@ Django 路由在 urls.py 配置，urls.py 中的每一条配置对应相应的�
 
 **re_path**：用于正则路径，需要自己手动添加正则首位限制符号。
 
-## 正则路径中的分组
+### 正则路径中的分组
 
-### 正则路径中的无名分组
+#### 正则路径中的无名分组
 
 无名分组按位置传参，一一对应。
 
 views 中除了 request，其他形参的数量要与 urls 中的分组数量一致。
 
-### 正则路径中的有名分组
+#### 正则路径中的有名分组
 
 语法： (?P<组名>正则表达式)
 
@@ -642,7 +642,7 @@ views 中除了 request，其他形参的数量要与 urls 中的分组数量一
 
 views 中除了 request，其他形参的数量要与 urls 中的分组数量一致， 并且 views 中的形参名称要与 urls 中的组名对应。
 
-#### 路由分发(include)
+##### 路由分发(include)
 
 **存在问题**：Django 项目里多个app目录共用一个 urls 容易造成混淆，后期维护也不方便。
 
@@ -664,7 +664,7 @@ urlpatterns = [
 ]
 ```
 
-## 反向解析
+### 反向解析
 
 随着功能的增加，路由层的 url 发生变化，就需要去更改对应的视图层和模板层的 url，非常麻烦，不便维护。
 
@@ -672,7 +672,7 @@ urlpatterns = [
 
 反向解析一般用在模板中的超链接及视图中的重定向。
 
-### 普通路径
+#### 普通路径
 
 在 urls.py 中给路由起别名，**name="路由别名"**。
 
@@ -692,7 +692,7 @@ return redirect(reverse("login"))
 <form action="{% url 'login' %}" method="post"> 
 ```
 
-### 正则路径（无名分组）
+#### 正则路径（无名分组）
 
 在 urls.py 中给路由起别名，**name="路由别名"**。
 
@@ -712,7 +712,7 @@ return redirect(reverse("login",args=(10,)))
 <form action="{% url 'login' 10 %}" method="post"> 
 ```
 
-### 正则路径（有名分组）
+#### 正则路径（有名分组）
 
 在 urls.py 中给路由起别名，**name="路由别名"**。
 
@@ -732,7 +732,7 @@ return redirect(reverse("login",kwargs={"year":3333}))
 <form action="{% url 'login' year=3333 %}" method="post">
 ```
 
-## 命名空间
+### 命名空间
 
 命名空间（英语：Namespace）是表示标识符的可见范围。
 
@@ -744,7 +744,7 @@ return redirect(reverse("login",kwargs={"year":3333}))
 
 **解决：**使用命名空间。
 
-### 普通路径
+##### 普通路径
 
 定义命名空间（include 里面是一个元组）格式如下：
 
@@ -789,7 +789,7 @@ return redirect(reverse("app01:login")
 <form action="{% url 'app01:login' %}" method="post">
 ```
 
-# Django Admin 管理工具
+## Django Admin 管理工具
 
 Django 提供了基于 web 的管理工具。
 
@@ -811,7 +811,7 @@ django.contrib是一套庞大的功能集，它是Django基本代码的组成部
 
 ------
 
-## 激活管理工具
+### 激活管理工具
 
 通常我们在生成项目时会在 urls.py 中自动设置好，我们只需去掉注释即可。
 
@@ -832,7 +832,7 @@ urlpatterns = [
 
 ------
 
-## 使用管理工具
+### 使用管理工具
 
 启动开发服务器，然后在浏览器中访问 http://127.0.0.1:8000/admin/，得到默认的管理界面。
 
@@ -862,7 +862,7 @@ admin.site.register(Test)
 
 刷新后即可看到 Testmodel 数据表在界面上显示。
 
-## 复杂模型
+### 复杂模型
 
 管理页面的功能强大，完全有能力处理更加复杂的数据模型。
 
@@ -915,7 +915,7 @@ $ python manage.py makemigrations TestModel  # 让 Django 知道我们在我们�
 $ python manage.py migrate TestModel   # 创建表结构
 ```
 
-## 自定义表单
+### 自定义表单
 
 我们可以自定义管理页面，来取代默认的页面。比如上面的 "add" 页面。我们想只显示 name 和 email 部分。修改 TestModel/admin.py:
 
@@ -963,7 +963,7 @@ admin.site.register([Test, Tag])
 
 上面的栏目分为了 Main 和 Advance 两部分。classes 说明它所在的部分的 CSS 格式。
 
-## 内联(Inline)显示
+### 内联(Inline)显示
 
 上面的 Contact 是 Tag 的外部键，所以有外部参考的关系。
 
@@ -997,7 +997,7 @@ admin.site.register(Contact, ContactAdmin)
 admin.site.register([Test])
 ```
 
-## 列表页的显示
+### 列表页的显示
 
 在 Contact 输入数条记录后
 
@@ -1084,6 +1084,815 @@ owner=models.ForeignKey(UserProfile,on_delete=models.CASCADE) --在老版本这�
  SET_DEFAULT：此值设置，会把设置为外键的默认值。
  SET()：此值设置，会调用外面的值，可以是一个函数。一般情况下使用 CASCADE 就可以了。
 ```
+
+## Django ORM - 单表实例
+
+### 数据库添加
+
+**方式一：**模型类实例化对象
+
+需从 app 目录引入 models.py 文件：
+
+```
+from app 目录 import models
+```
+
+并且实例化对象后要执行 **对象.save()** 才能在数据库中新增成功。
+
+```python
+# app01/views.py: 文件代码：
+from django.shortcuts import render,HttpResponse
+from app01 import models 
+def add_book(request):
+    book = models.Book(title="菜鸟教程",price=300,publish="菜鸟出版社",pub_date="2008-8-8") 
+    book.save()
+    return HttpResponse("<p>数据添加成功！</p>")
+```
+
+**方式二：**通过 ORM 提供的 objects 提供的方法 create 来实现（推荐）
+
+```python
+# app01/views.py: 文件代码：
+from django.shortcuts import render,HttpResponse
+from app01 import models 
+def add_book(request):
+    books = models.Book.objects.create(title="如来神掌",price=200,publish="功夫出版社",pub_date="2010-10-10") 
+    print(books, type(books)) # Book object (18) 
+    return HttpResponse("<p>数据添加成功！</p>")
+```
+
+### 数据库查找
+
+使用 **all()** 方法来查询所有内容。
+
+返回的是 QuerySet 类型数据，类似于 list，里面放的是一个个模型类的对象，可用索引下标取出模型类的对象。
+
+```python
+# app01/views.py: 文件代码：
+from django.shortcuts import render,HttpResponse
+from app01 import models 
+def add_book(request):
+    books = models.Book.objects.all() 
+    print(books,type(books)) # QuerySet类型，类似于list，访问 url 时数据显示在命令行窗口中。
+    return HttpResponse("<p>查找成功！</p>")
+```
+
+**filter()** 方法用于查询符合条件的数据。
+
+返回的是 QuerySet 类型数据，类似于 list，里面放的是满足条件的模型类的对象，可用索引下标取出模型类的对象。
+
+pk=3 的意思是主键 primary key=3，相当于 id=3。
+
+因为 id 在 pycharm 里有特殊含义，是看内存地址的内置函数 id()，因此用 pk。
+
+```python
+# app01/views.py: 文件代码：
+from django.shortcuts import render,HttpResponse
+from app01 import models 
+def add_book(request):
+    books = models.Book.objects.filter(pk=5)
+    print(books)
+    print("//////////////////////////////////////")
+    books = models.Book.objects.filter(publish='菜鸟出版社', price=300)
+    print(books, type(books))  # QuerySet类型，类似于list。
+    return HttpResponse("<p>查找成功！</p>")
+```
+
+**exclude()** 方法用于查询不符合条件的数据。
+
+返回的是 QuerySet 类型数据，类似于 list，里面放的是不满足条件的模型类的对象，可用索引下标取出模型类的对象。
+
+```python
+# app01/views.py: 文件代码：
+from django.shortcuts import render,HttpResponse
+from app01 import models 
+def add_book(request):
+    books = models.Book.objects.exclude(pk=5)
+    print(books)
+    print("//////////////////////////////////////")
+    books = models.Book.objects.exclude(publish='菜鸟出版社', price=300)
+    print(books, type(books))  # QuerySet类型，类似于list。
+    return HttpResponse("<p>查找成功！</p>")
+```
+
+**get()** 方法用于查询符合条件的返回模型类的对象符合条件的对象只能为一个，如果符合筛选条件的对象超过了一个或者没有一个都会抛出错误。
+
+```python
+# app01/views.py: 文件代码：
+from django.shortcuts import render,HttpResponse
+from app01 import models 
+def add_book(request):
+    books = models.Book.objects.get(pk=5)
+    books = models.Book.objects.get(pk=18)  # 报错，没有符合条件的对象
+    books = models.Book.objects.get(price=200)  # 报错，符合条件的对象超过一个
+    print(books, type(books))  # 模型类的对象
+    return HttpResponse("<p>查找成功！</p>")
+```
+
+**order_by()** 方法用于对查询结果进行排序。
+
+返回的是 QuerySet类型数据，类似于list，里面放的是排序后的模型类的对象，可用索引下标取出模型类的对象。
+
+**注意：**
+
+- a、参数的字段名要加引号。
+- b、降序为在字段前面加个负号 **-**。
+
+```python
+# app01/views.py: 文件代码：
+from django.shortcuts import render,HttpResponse
+from app01 import models 
+def add_book(request):
+    books = models.Book.objects.order_by("price") # 查询所有，按照价格升序排列 
+    books = models.Book.objects.order_by("-price") # 查询所有，按照价格降序排列
+    return HttpResponse("<p>查找成功！</p>")
+```
+
+**reverse()** 方法用于对查询结果进行反转。
+
+返回的是 QuerySe t类型数据，类似于 list，里面放的是反转后的模型类的对象，可用索引下标取出模型类的对象。
+
+```python
+# app01/views.py: 文件代码：
+from django.shortcuts import render,HttpResponse
+from app01 import models 
+def add_book(request):
+    # 按照价格升序排列：降序再反转
+    books = models.Book.objects.order_by("-price").reverse()
+    return HttpResponse("<p>查找成功！</p>")
+```
+
+**count()** 方法用于查询数据的数量返回的数据是整数。
+
+```python
+# app01/views.py: 文件代码：
+from django.shortcuts import render,HttpResponse
+from app01 import models 
+def add_book(request):
+    books = models.Book.objects.count() # 查询所有数据的数量 
+    books = models.Book.objects.filter(price=200).count() # 查询符合条件数据的数量
+    return HttpResponse("<p>查找成功！</p>")
+```
+
+**first()** 方法返回第一条数据返回的数据是模型类的对象也可以用索引下标 **[0]**。
+
+```python
+# app01/views.py: 文件代码：
+from django.shortcuts import render,HttpResponse
+from app01 import models 
+def add_book(request):
+    books = models.Book.objects.first() # 返回所有数据的第一条数据
+    return HttpResponse("<p>查找成功！</p>")
+```
+
+**last()** 方法返回最后一条数据返回的数据是模型类的对象不能用索引下标 **[-1]**，ORM 没有逆序索引。
+
+```python
+# app01/views.py: 文件代码：
+from django.shortcuts import render,HttpResponse
+from app01 import models 
+def add_book(request):
+    books = models.Book.objects.last() # 返回所有数据的最后一条数据
+    return HttpResponse("<p>查找成功！</p>")
+```
+
+**exists()** 方法用于判断查询的结果 QuerySet 列表里是否有数据。
+
+返回的数据类型是布尔，有为 true，没有为 false。
+
+**注意：**判断的数据类型只能为 QuerySet 类型数据，不能为整型和模型类的对象。
+
+```python
+# 实例
+from django.shortcuts import render,HttpResponse
+from app01 import models
+def add_book(request):
+    books = models.Book.objects.exists()
+    # 报错，判断的数据类型只能为QuerySet类型数据，不能为整型
+    books = models.Book.objects.count().exists()
+    # 报错，判断的数据类型只能为QuerySet类型数据，不能为模型类对象
+    books = models.Book.objects.first().exists()  
+    return HttpResponse("<p>查找成功！</p>")
+```
+
+**values()** 方法用于查询部分字段的数据。
+
+返回的是 QuerySet 类型数据，类似于 list，里面不是模型类的对象，而是一个可迭代的字典序列，字典里的键是字段，值是数据。
+
+**注意：**
+
+- 参数的字段名要加引号
+
+- 想要字段名和数据用 **values**
+
+- ```python
+  # 实例
+  from django.shortcuts import render,HttpResponse
+  from app01 import models
+  def add_book(request):
+      # 查询所有的id字段和price字段的数据
+      books = models.Book.objects.values("pk","price")
+      print(books[0]["price"],type(books)) # 得到的是第一条记录的price字段的数据
+      return HttpResponse("<p>查找成功！</p>")
+  ```
+
+**values_list()** 方法用于查询部分字段的数据。
+
+返回的是 QuerySet 类型数据，类似于 list，里面不是模型类的对象，而是一个个元组，元组里放的是查询字段对应的数据。
+
+**注意：**
+
+- 参数的字段名要加引号
+- 只想要数据用 values_list
+
+```python
+# 实例
+
+from django.shortcuts import render,HttpResponse
+from app01 import models
+def add_book(request):
+    # 查询所有的price字段和publish字段的数据
+    books = models.Book.objects.values_list("price","publish")
+    print(books)
+    print(books[0][0],type(books)) # 得到的是第一条记录的price字段的数据
+    return HttpResponse("<p>查找成功！</p>")
+```
+
+**distinct()** 方法用于对数据进行去重。
+
+返回的是 QuerySet 类型数据。
+
+**注意：**
+
+- 对模型类的对象去重没有意义，因为每个对象都是一个不一样的存在。
+- distinct() 一般是联合 values 或者 values_list 使用。
+
+```python
+#实例
+from django.shortcuts import render,HttpResponse
+from app01 import models
+def add_book(request):
+    # 查询一共有多少个出版社
+    books = models.Book.objects.values_list("publish").distinct() # 对模型类的对象去重没有意义，因为每个对象都是一个不一样的存在。
+    books = models.Book.objects.distinct()
+    return HttpResponse("<p>查找成功！</p>")
+```
+
+**filter()** 方法基于双下划线的模糊查询（exclude 同理）。
+
+**注意：**filter 中运算符号只能使用等于号 = ，不能使用大于号 > ，小于号 < ，等等其他符号。
+
+__in 用于读取区间，= 号后面为列表 。
+
+```python
+# 实例
+from django.shortcuts import render,HttpResponse
+from app01 import models
+def add_book(request):
+    # 查询价格为200或者300的数据
+    books = models.Book.objects.filter(price__in=[200,300])
+    return HttpResponse("<p>查找成功！</p>")
+```
+
+**__gt** 大于号 ，= 号后面为数字。
+
+```python
+# 查询价格大于200的数据 
+books = models.Book.objects.filter(price__gt=200)
+```
+
+**__gte** 大于等于，= 号后面为数字。
+
+```
+# 查询价格大于等于200的数据 
+books = models.Book.objects.filter(price__gte=200)
+```
+
+**__lt** 小于，=号后面为数字。
+
+```
+# 查询价格小于300的数据 
+books=models.Book.objects.filter(price__lt=300)
+```
+
+**__lte** 小于等于，= 号后面为数字。
+
+```
+# 查询价格小于等于300的数据 
+books=models.Book.objects.filter(price__lte=300)
+```
+
+**__range** 在 ... 之间，左闭右闭区间，= 号后面为两个元素的列表。
+
+```
+books=models.Book.objects.filter(price__range=[200,300])
+```
+
+**__contains** 包含，= 号后面为字符串。
+
+```
+books=models.Book.objects.filter(title__contains="菜")
+```
+
+**__icontains** 不区分大小写的包含，= 号后面为字符串。
+
+```
+books=models.Book.objects.filter(title__icontains="python") # 不区分大小写
+```
+
+**__startswith** 以指定字符开头，= 号后面为字符串。
+
+```
+books=models.Book.objects.filter(title__startswith="菜")
+```
+
+**__endswith** 以指定字符结尾，= 号后面为字符串。
+
+```python
+books=models.Book.objects.filter(title__endswith="教程")
+```
+
+**__year** 是 DateField 数据类型的年份，= 号后面为数字。
+
+```python
+books=models.Book.objects.filter(pub_date__year=2008) 
+```
+
+**__month** 是DateField 数据类型的月份，= 号后面为数字。
+
+```python
+books=models.Book.objects.filter(pub_date__month=10) 
+```
+
+**__day** 是DateField 数据类型的天数，= 号后面为数字。
+
+```python
+books=models.Book.objects.filter(pub_date__day=01)
+```
+
+### 数据库删除
+
+**方式一：**使用模型类的 **对象.delete()**。
+
+**返回值：**元组，第一个元素为受影响的行数。
+
+```python
+books=models.Book.objects.filter(pk=8).first().delete()
+```
+
+**方式二**：使用 QuerySet **类型数据.delete()**(推荐)
+
+**返回值：**元组，第一个元素为受影响的行数。
+
+```python
+books=models.Book.objects.filter(pk__in=[1,2]).delete()
+```
+
+**注意：**
+
+- a. Django 删除数据时，会模仿 SQL约束 ON DELETE CASCADE 的行为，也就是删除一个对象时也会删除与它相关联的外键对象。
+- b. delete() 方法是 QuerySet 数据类型的方法，但并不适用于 Manager 本身。也就是想要删除所有数据，不能不写 all。
+
+```python
+books=models.Book.objects.delete()　 # 报错
+books=models.Book.objects.all().delete()　　 # 删除成功
+```
+
+### 数据库修改
+
+**方式一：**
+
+```shell
+模型类的对象.属性 = 更改的属性值
+模型类的对象.save()
+```
+
+**返回值：**编辑的模型类的对象。
+
+```python
+books = models.Book.objects.filter(pk=7).first() 
+books.price = 400 
+books.save()
+```
+
+**方式二：**QuerySet 类型数据.update(字段名=更改的数据)（推荐）
+
+**返回值：**整数，受影响的行数
+
+```python
+# 实例
+from django.shortcuts import render,HttpResponse
+from app01 import models
+def add_book(request):
+    books = models.Book.objects.filter(pk__in=[7,8]).update(price=888)
+    return HttpResponse(books)
+```
+
+## Django ORM – 多表实例
+
+表与表之间的关系可分为以下三种：
+
+- **一对一**: 一个人对应一个身份证号码，数据字段设置 unique。
+- **一对多**: 一个家庭有多个人，一般通过外键来实现。
+- **多对多**: 一个学生有多门课程，一个课程有很多学生，一般通过第三个表来实现关联。
+
+### 创建模型
+
+接下来我们来看下多表多实例。
+
+```python
+# 实例
+class Book(models.Model):
+    title = models.CharField(max_length=32)
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    pub_date = models.DateField()
+    publish = models.ForeignKey("Publish", on_delete=models.CASCADE)
+    authors = models.ManyToManyField("Author")
+
+
+class Publish(models.Model):
+    name = models.CharField(max_length=32)
+    city = models.CharField(max_length=64)
+    email = models.EmailField()
+
+
+class Author(models.Model):
+    name = models.CharField(max_length=32)
+    age = models.SmallIntegerField()
+    au_detail = models.OneToOneField("AuthorDetail", on_delete=models.CASCADE)
+
+
+class AuthorDetail(models.Model):
+    gender_choices = (
+        (0, "女"),
+        (1, "男"),
+        (2, "保密"),
+    )
+    gender = models.SmallIntegerField(choices=gender_choices)
+    tel = models.CharField(max_length=32)
+    addr = models.CharField(max_length=64)
+    birthday = models.DateField()
+```
+
+**说明：**
+
+- 1、EmailField 数据类型是邮箱格式，底层继承 CharField，进行了封装，相当于 MySQL 中的 varchar。
+- 2、Django1.1 版本不需要联级删除：on_delete=models.CASCADE，Django2.2 需要。
+- 3、一般不需要设置联级更新.
+- 4、外键在一对多的多中设置：**models.ForeignKey("关联类名", on_delete=models.CASCADE)**。
+- 5、OneToOneField = ForeignKey(...，unique=True)设置一对一。
+- 6、若有模型类存在外键，创建数据时，要先创建外键关联的模型类的数据，不然创建包含外键的模型类的数据时，外键的关联模型类的数据会找不到。
+
+### 表结构
+
+**书籍表 Book**：title 、 price 、 pub_date 、 publish（外键，多对一） 、 authors（多对多）
+
+**出版社表 Publish**：name 、 city 、 email
+
+**作者表 Author**：name 、 age 、 au_detail（一对一）
+
+**作者详情表 AuthorDetail**：gender 、 tel 、 addr 、 birthday
+
+以下是表格关联说明：
+
+![Django-orm2_1](E:\markdownInJob\typora-user-images\Django-orm2_1.png)
+
+### 插入数据
+
+我们在 MySQL 中执行以下 SQL 插入操作：
+
+```python
+insert into app01_publish(name,city,email) values ("华山出版社", "华山", "hs@163.com"), ("明教出版社", "黑木崖", "mj@163.com")
+ 
+# 先插入 authordetail 表中多数据
+insert into app01_authordetail(gender,tel,addr,birthday) values (1,13432335433,"华山","1994-5-23"), (1,13943454554,"黑木崖","1961-8-13"), (0,13878934322,"黑木崖","1996-5-20") 
+
+# 再将数据插入 author，这样 author 才能找到 authordetail 
+insert into app01_author(name,age,au_detail_id) values ("令狐冲",25,1), ("任我行",58,2), ("任盈盈",23,3)
+```
+
+### ORM - 添加数据
+
+#### 一对多(外键 ForeignKey)
+
+**方式一:** 传对象的形式，返回值的数据类型是对象，书籍对象。
+
+**步骤：**
+
+- a. 获取出版社对象
+- b. 给书籍的出版社属性 publish 传出版社对象
+
+```python
+# app01/views.py 文件代码：
+def add_book(request):
+    #  获取出版社对象
+    pub_obj = models.Publish.objects.filter(pk=1).first()
+    #  给书籍的出版社属性publish传出版社对象
+    book = models.Book.objects.create(title="菜鸟教程", price=200, pub_date="2010-10-10", publish=pub_obj)
+    print(book, type(book))
+    return HttpResponse(book)
+```
+
+方式二: 传对象 id 的形式(由于传过来的数据一般是 id,所以传对象 id 是常用的)。
+
+一对多中，设置外键属性的类(多的表)中，MySQL 中显示的字段名是:**外键属性名_id**。
+
+返回值的数据类型是对象，书籍对象。
+
+**步骤：**
+
+- a. 获取出版社对象的 id
+- b. 给书籍的关联出版社字段 publish_id 传出版社对象的 id
+
+```python
+# app01/views.py 文件代码：
+def add_book(request):
+    #  获取出版社对象
+    pub_obj = models.Publish.objects.filter(pk=1).first()
+    #  获取出版社对象的id
+    pk = pub_obj.pk
+    #  给书籍的关联出版社字段 publish_id 传出版社对象的id
+    book = models.Book.objects.create(title="冲灵剑法", price=100, pub_date="2004-04-04", publish_id=pk)
+    print(book, type(book))
+    return HttpResponse(book)
+```
+
+### 多对多(ManyToManyField)：在第三张关系表中新增数据
+
+**方式一:** 传对象形式，无返回值。
+
+**步骤：**
+
+- a. 获取作者对象
+- b. 获取书籍对象
+- c. 给书籍对象的 authors 属性用 add 方法传作者对象
+
+```python
+# app01/views.py 文件代码：
+def add_book(request):
+    #  获取作者对象
+    chong = models.Author.objects.filter(name="令狐冲").first()
+    ying = models.Author.objects.filter(name="任盈盈").first()
+    #  获取书籍对象
+    book = models.Book.objects.filter(title="菜鸟教程").first()
+    #  给书籍对象的 authors 属性用 add 方法传作者对象
+    book.authors.add(chong, ying)
+    return HttpResponse(book)
+```
+
+**方式二:** 传对象id形式，无返回值。
+
+**步骤：**
+
+- a. 获取作者对象的 id
+- b. 获取书籍对象
+- c. 给书籍对象的 authors 属性用 add 方法传作者对象的 id
+
+```python
+# app01/views.py 文件代码：
+def add_book(request):
+    #  获取作者对象
+    chong = models.Author.objects.filter(name="令狐冲").first()
+    #  获取作者对象的id
+    pk = chong.pk
+    #  获取书籍对象
+    book = models.Book.objects.filter(title="冲灵剑法").first()
+    #  给书籍对象的 authors 属性用 add 方法传作者对象的id
+    book.authors.add(pk)
+```
+
+### 关联管理器(对象调用)
+
+**前提：**
+
+- 多对多（双向均有关联管理器）
+- 一对多（只有多的那个类的对象有关联管理器，即反向才有）
+
+**语法格式：**
+
+```
+正向：属性名
+反向：小写类名加 _set
+```
+
+**注意：**一对多只能反向
+
+**常用方法：**
+
+**add()**：用于多对多，把指定的模型对象添加到关联对象集（关系表）中。
+
+**注意：**add() 在一对多(即外键)中，只能传对象（ *QuerySet数据类型），不能传 id（*[id表]）。
+
+***[ ]** 的使用:
+
+\# 方式一：传对象
+
+```python
+book_obj = models.Book.objects.get(id=10)
+author_list = models.Author.objects.filter(id__gt=2)
+book_obj.authors.add(*author_list)  # 将 id 大于2的作者对象添加到这本书的作者集合中
+# 方式二：传对象 id
+book_obj.authors.add(*[1,3]) # 将 id=1 和 id=3 的作者对象添加到这本书的作者集合中
+return HttpResponse("ok")
+```
+
+反向：**小写表名_set**
+
+```python
+ying = models.Author.objects.filter(name="任盈盈").first()
+book = models.Book.objects.filter(title="冲灵剑法").first()
+ying.book_set.add(book)
+return HttpResponse("ok")
+```
+
+**create()**：创建一个新的对象，并同时将它添加到关联对象集之中。
+
+返回新创建的对象。
+
+```python
+pub = models.Publish.objects.filter(name="明教出版社").first()
+wo = models.Author.objects.filter(name="任我行").first()
+book = wo.book_set.create(title="吸星大法", price=300, pub_date="1999-9-19", publish=pub)
+**print**(book, type(book))
+**return** HttpResponse("ok")
+```
+
+**remove()**：从关联对象集中移除执行的模型对象。
+
+对于 ForeignKey 对象，这个方法仅在 null=True（可以为空）时存在，无返回值。
+
+```python
+# 实例
+author_obj =models.Author.objects.get(id=1)
+book_obj = models.Book.objects.get(id=11)
+author_obj.book_set.remove(book_obj)
+return HttpResponse("ok")
+```
+
+**clear()**：从关联对象集中移除一切对象，删除关联，不会删除对象。
+
+对于 ForeignKey 对象，这个方法仅在 null=True（可以为空）时存在。
+
+无返回值。
+
+```python
+#  清空独孤九剑关联的所有作者
+book = models.Book.objects.filter(title="菜鸟教程").first()
+book.authors.clear()
+```
+
+### ORM 查询
+
+基于对象的跨表查询。
+
+```
+正向：属性名称
+反向：小写类名_set
+```
+
+#### 一对多
+
+查询主键为 1 的书籍的出版社所在的城市（正向）。
+
+```python
+#  实例
+book = models.Book.objects.filter(pk=10).first()
+res = book.publish.city
+print(res, type(res))
+return HttpResponse("ok")
+```
+
+查询明教出版社出版的书籍名（反向）。
+
+反向：**对象.小写类名_set(pub.book_set)** 可以跳转到关联的表(书籍表)。
+
+**pub.book_set.all()**：取出书籍表的所有书籍对象，在一个 QuerySet 里，遍历取出一个个书籍对象。
+
+```python
+# 实例
+pub = models.Publish.objects.filter(name="明教出版社").first()
+res = pub.book_set.all()
+for i in res:
+    print(i.title)
+return HttpResponse("ok")
+```
+
+### 一对一
+
+查询令狐冲的电话（正向）
+
+正向：对象.属性 (author.au_detail) 可以跳转到关联的表(作者详情表)
+
+```python
+# 实例
+author = models.Author.objects.filter(name="令狐冲").first()
+res = author.au_detail.tel
+print(res, type(res))
+return HttpResponse("ok")
+```
+
+查询所有住址在黑木崖的作者的姓名（反向）。
+
+一对一的反向，用 **对象.小写类名** 即可，不用加 _set。
+
+反向：对象.小写类名(addr.author)可以跳转到关联的表(作者表)。
+
+```python
+# 实例
+addr = models.AuthorDetail.objects.filter(addr="黑木崖").first()
+res = addr.author.name
+print(res, type(res))
+return HttpResponse("ok")
+```
+
+### 多对多
+
+菜鸟教程所有作者的名字以及手机号（正向）。
+
+正向：**对象.属性(book.authors)**可以跳转到关联的表(作者表)。
+
+作者表里没有作者电话，因此再次通过**对象.属性(i.au_detail)**跳转到关联的表（作者详情表）。
+
+```python
+# 实例
+book = models.Book.objects.filter(title="菜鸟教程").first()
+res = book.authors.all()
+for i in res:
+    print(i.name, i.au_detail.tel)
+return HttpResponse("ok")
+```
+
+查询任我行出过的所有书籍的名字（反向）。
+
+```python
+# 实例
+author = models.Author.objects.filter(name="任我行").first()
+res = author.book_set.all()
+for i in res:
+    print(i.title)
+return HttpResponse("ok")
+```
+
+### 基于双下划线的跨表查询
+
+#### 正向：属性名称__跨表的属性名称 反向：小写类名__跨表的属性名称
+
+#### 一对多
+
+查询菜鸟出版社出版过的所有书籍的名字与价格。
+
+```python
+# 实例
+res = models.Book.objects.filter(publish__name="菜鸟出版社").values_list("title", "price")
+```
+
+反向：通过 小**写类名__跨表的属性名称（book__title，book__price）** 跨表获取数据。
+
+```python
+# 实例
+res = models.Publish.objects.filter(name="菜鸟出版社").values_list("book__title","book__price")
+return HttpResponse("ok")
+```
+
+#### 多对多
+
+查询任我行出过的所有书籍的名字。
+
+正向：通过 属性名称__跨表的属性名称(authors__name) 跨表获取数据：
+
+```python
+res = models.Book.objects.filter(authors__name="任我行").values_list("title")
+```
+
+反向：通过 小写类名__跨表的属性名称（book__title） 跨表获取数据：
+
+```python
+res = models.Author.objects.filter(name="任我行").values_list("book__title")
+```
+
+#### 一对一
+
+查询任我行的手机号。
+
+正向：通过 **属性名称__跨表的属性名称(au_detail__tel)** 跨表获取数据。
+
+```python
+res = models.Author.objects.filter(name="任我行").values_list("au_detail__tel")
+```
+
+反向：通过 **小写类名__跨表的属性名称（author__name）** 跨表获取数据。
+
+```python
+res = models.AuthorDetail.objects.filter(author__name="任我行").values_list("tel")
+```
+
+
+
+
+
+
+
+
 
 
 
