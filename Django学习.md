@@ -1104,7 +1104,7 @@ from app 目录 import models
 from django.shortcuts import render,HttpResponse
 from app01 import models 
 def add_book(request):
-    book = models.Book(title="菜鸟教程",price=300,publish="菜鸟出版社",pub_date="2008-8-8") 
+    book = models.Book(title="菜鸟教程",price=300,publish="菜鸟出版社",pub_date="2008-8-8")
     book.save()
     return HttpResponse("<p>数据添加成功！</p>")
 ```
@@ -1234,7 +1234,7 @@ def add_book(request):
     return HttpResponse("<p>查找成功！</p>")
 ```
 
-**first()** 方法返回第一条数据返回的数据是模型类的对象也可以用索引下标 **[0]**。
+**first()** 方法返回第一条数据返回的数据是模型类的对象也可以用索引下标 。
 
 ```python
 # app01/views.py: 文件代码：
@@ -1245,7 +1245,7 @@ def add_book(request):
     return HttpResponse("<p>查找成功！</p>")
 ```
 
-**last()** 方法返回最后一条数据返回的数据是模型类的对象不能用索引下标 **[-1]**，ORM 没有逆序索引。
+**last()** 方法返回最后一条数据返回的数据是模型类的对象不能用索引下标，ORM 没有逆序索引。
 
 ```python
 # app01/views.py: 文件代码：
@@ -1342,7 +1342,7 @@ def add_book(request):
 
 **注意：**filter 中运算符号只能使用等于号 = ，不能使用大于号 > ，小于号 < ，等等其他符号。
 
-__in 用于读取区间，= 号后面为列表 。
+**__in** 用于读取区间，= 号后面为列表 。
 
 ```python
 # 实例
@@ -1363,46 +1363,46 @@ books = models.Book.objects.filter(price__gt=200)
 
 **__gte** 大于等于，= 号后面为数字。
 
-```
+```python
 # 查询价格大于等于200的数据 
 books = models.Book.objects.filter(price__gte=200)
 ```
 
 **__lt** 小于，=号后面为数字。
 
-```
+```python
 # 查询价格小于300的数据 
 books=models.Book.objects.filter(price__lt=300)
 ```
 
 **__lte** 小于等于，= 号后面为数字。
 
-```
+```python
 # 查询价格小于等于300的数据 
 books=models.Book.objects.filter(price__lte=300)
 ```
 
 **__range** 在 ... 之间，左闭右闭区间，= 号后面为两个元素的列表。
 
-```
+```python
 books=models.Book.objects.filter(price__range=[200,300])
 ```
 
 **__contains** 包含，= 号后面为字符串。
 
-```
+```python
 books=models.Book.objects.filter(title__contains="菜")
 ```
 
 **__icontains** 不区分大小写的包含，= 号后面为字符串。
 
-```
+```python
 books=models.Book.objects.filter(title__icontains="python") # 不区分大小写
 ```
 
 **__startswith** 以指定字符开头，= 号后面为字符串。
 
-```
+```python
 books=models.Book.objects.filter(title__startswith="菜")
 ```
 
@@ -1884,6 +1884,230 @@ res = models.Author.objects.filter(name="任我行").values_list("au_detail__tel
 
 ```python
 res = models.AuthorDetail.objects.filter(author__name="任我行").values_list("tel")
+```
+
+## Django ORM – 多表实例（聚合与分组查询）
+
+### 聚合查询（aggregate）
+
+聚合查询函数是对一组值执行计算，并返回单个值。
+
+Django 使用聚合查询前要先从 django.db.models 引入 Avg、Max、Min、Count、Sum（首字母大写）。
+
+```
+from django.db.models import Avg,Max,Min,Count,Sum  #   引入函数
+```
+
+聚合查询返回值的数据类型是字典。
+
+聚合函数 aggregate() 是 QuerySet 的一个终止子句， 生成的一个汇总值，相当于 count()。
+
+使用 aggregate() 后，数据类型就变为字典，不能再使用 QuerySet 数据类型的一些 API 了。
+
+日期数据类型(DateField)可以用 Max 和 Min。
+
+返回的字典中：键的名称默认是（属性名称加上__聚合函数名），值是计算出来的聚合值。
+
+如果要自定义返回字典的键的名称，可以起别名：
+
+```
+aggregate(别名 = 聚合函数名("属性名称"))
+```
+
+计算所有图书的平均价格:
+
+```python
+# 实例
+from django.db.models import Avg,Max,Min,Count,Sum  #   引入函数
+...
+res = models.Book.objects.aggregate(Avg("price"))
+print(res, type(res))
+...
+```
+
+计算所有图书的数量、最贵价格和最便宜价格:
+
+```python
+# 实例
+res=models.Book.objects.aggregate(c=Count("id"),max=Max("price"),min=Min("price"))
+print(res,type(res)
+```
+
+### 分组查询（annotate）
+
+分组查询一般会用到聚合函数，所以使用前要先从 django.db.models 引入 Avg,Max,Min,Count,Sum（首字母大写）。
+
+```
+from django.db.models import Avg,Max,Min,Count,Sum  #   引入函数
+```
+
+**返回值：**
+
+- 分组后，用 values 取值，则返回值是 QuerySet 数据类型里面为一个个字典；
+- 分组后，用 values_list 取值，则返回值是 QuerySet 数据类型里面为一个个元组。
+
+MySQL 中的 limit 相当于 ORM 中的 QuerySet 数据类型的切片。
+
+**注意：**
+
+annotate 里面放聚合函数。
+
+- **values 或者 values_list 放在 annotate 前面：**values 或者 values_list 是声明以什么字段分组，annotate 执行分组。
+- **values 或者 values_list 放在annotate后面：** annotate 表示直接以当前表的pk执行分组，values 或者 values_list 表示查询哪些字段， 并且要将 annotate 里的聚合函数起别名，在 values 或者 values_list 里写其别名。
+
+#### 准备数据和创建模型
+
+```python
+# models.py
+class Emp(models.Model):
+    name = models.CharField(max_length=32)
+    age = models.IntegerField()
+    salary = models.DecimalField(max_digits=8, decimal_places=2)
+    dep = models.CharField(max_length=32)
+    province = models.CharField(max_length=32)
+
+class Emps(models.Model):
+    name = models.CharField(max_length=32)
+    age = models.IntegerField()
+    salary =     models.DecimalField(max_digits=8, decimal_places=2)
+    dep = models.ForeignKey("Dep", on_delete=models.CASCADE)
+    province = models.CharField(max_length=32)
+class Dep(models.Model):
+    title = models.CharField(max_length=32)
+```
+
+```mysql
+# 在 MySQL 命令行中执行：
+INSERT INTO `app01_emp` (`id`, `name`, `age`, `salary`, `dep`, `province`) VALUES ('1', '令狐冲', '24', '6000.00', '销售部', '河南'); INSERT INTO `app01_emp` (`id`, `name`, `age`, `salary`, `dep`, `province`) VALUES ('2', '任盈盈', '18', '8000.00', '关公部', '广东'); INSERT INTO `app01_emp` (`id`, `name`, `age`, `salary`, `dep`, `province`) VALUES ('3', '任我行', '56', '10000.00', '销售部', '广东'); INSERT INTO `app01_emp` (`id`, `name`, `age`, `salary`, `dep`, `province`) VALUES ('4', '岳灵珊', '19', '6000.00', '关公部', '河南'); INSERT INTO `app01_emp` (`id`, `name`, `age`, `salary`, `dep`, `province`) VALUES ('5', '小龙女', '20', '8000.00', '关公部', '河北'); INSERT INTO `app01_dep` (`id`, `title`) VALUES ('1', '销售部'); 
+INSERT INTO `app01_dep` (`id`, `title`) VALUES ('2', '关公部'); 
+INSERT INTO `app01_emps` (`id`, `name`, `age`, `salary`, `province`, `dep_id`) VALUES ('2', '令狐冲', '24', '8000.00', '河南', '1'); 
+INSERT INTO `app01_emps` (`id`, `name`, `age`, `salary`, `province`, `dep_id`) VALUES ('3', '任盈盈', '18', '9000.00', '广东', '2'); 
+INSERT INTO `app01_emps` (`id`, `name`, `age`, `salary`, `province`, `dep_id`) VALUES ('4', '任我行', '57', '10000.00', '广东', '1');
+ INSERT INTO `app01_emps` (`id`, `name`, `age`, `salary`, `province`, `dep_id`) VALUES ('5', '岳灵珊', '19', '6000.00', '河南', '2');
+  INSERT INTO `app01_emps` (`id`, `name`, `age`, `salary`, `province`, `dep_id`) VALUES ('6', '小龙女', '20', '8000.00', '河北', '2');
+```
+
+统计每一个出版社的最便宜的书的价格：
+
+```python
+# 实例
+res = models.Publish.objects.values("name").annotate(in_price = Min("book__price"))
+print(res)
+```
+
+命令行中可以看到以下输出：
+
+```python
+<QuerySet [{'name': '菜鸟出版社', 'in_price': Decimal('100.00')}, {'name': '明教出版社', 'in_price': Decimal('300.00')}]>
+```
+
+统计每一本书的作者个数：
+
+```python
+# 实例
+res = models.Book.objects.annotate(c = Count("authors__name")).values("title","c")
+print(res)
+```
+
+命令行中可以看到以下输出：
+
+```python
+<QuerySet [{'title': '菜鸟教程', 'c': 1}, {'title': '吸星大法', 'c': 1}, {'title': '冲灵剑法', 'c': 1}]>
+```
+
+统计每一本以"菜"开头的书籍的作者个数：
+
+```python
+# 实例
+res = models.Book.objects.filter(title__startswith="菜").annotate(c = Count("authors__name")).values("title","c")
+print(res)
+```
+
+统计不止一个作者的图书名称：
+
+```python
+# 实例
+res = models.Book.objects.annotate(c = Count("authors__name")).filter(c__gt=0).values("title","c")
+print(res)
+```
+
+命令行中可以看到以下输出：
+
+```python
+<QuerySet [{'title': '菜鸟教程', 'c': 1}, {'title': '吸星大法', 'c': 1}, {'title': '冲灵剑法', 'c': 1}]>
+```
+
+```python
+# 实例
+from django.db.models import F
+...
+book=models.Emp.objects.filter(salary__gt=F("age")).values("name","age")
+...
+```
+
+将每一本书的价格提高100元:
+
+```python
+# 实例
+res = models.Book.objects.update(price=F("price")+100)
+print(res)
+```
+
+### Q() 查询
+
+使用前要先从 django.db.models 引入 Q:
+
+```
+from django.db.models import Q
+```
+
+用法：
+
+```
+Q(条件判断)
+```
+
+例如：
+
+```
+Q(title__startswith="菜")
+```
+
+之前构造的过滤器里的多个条件的关系都是 and，如果需要执行更复杂的查询（例如 or 语句），就可以使用 Q 。
+
+Q 对象可以使用 & | ~ （与 或 非）操作符进行组合。
+
+优先级从高到低：~ & |。
+
+可以混合使用 Q 对象和关键字参数，Q 对象和关键字参数是用"and"拼在一起的（即将逗号看成 and ），但是 Q 对象必须位于所有关键字参数的前面。
+
+查询价格大于 350 或者名称以菜开头的书籍的名称和价格。
+
+from django.db.models import Q
+
+```python
+# 实例
+...
+res=models.Book.objects.filter(Q(price__gt=350)|Q(title__startswith="菜")).values("title","price")
+print(res)
+...
+```
+
+查询以"菜"结尾或者不是 2010 年 10 月份的书籍:
+
+```python
+# 实例
+res = models.Book.objects.filter(Q(title__endswith="菜") | ~Q(Q(pub_date__year=2010) & Q(pub_date__month=10)))
+print(res)  
+```
+
+查询出版日期是 2004 或者 1999 年，并且书名中包含有"菜"的书籍。
+
+Q 对象和关键字混合使用，Q 对象要在所有关键字的前面:
+
+```python
+res = models.Book.objects.filter(Q(pub_date__year=2004) | Q(pub_date__year=1999), title__contains="菜")
+print(res)  
 ```
 
 
