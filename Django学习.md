@@ -1685,9 +1685,8 @@ def add_book(request):
 
 ***[ ]** 的使用:
 
-\# 方式一：传对象
-
 ```python
+# 方式一：传对象
 book_obj = models.Book.objects.get(id=10)
 author_list = models.Author.objects.filter(id__gt=2)
 book_obj.authors.add(*author_list)  # 将 id 大于2的作者对象添加到这本书的作者集合中
@@ -1713,8 +1712,8 @@ return HttpResponse("ok")
 pub = models.Publish.objects.filter(name="明教出版社").first()
 wo = models.Author.objects.filter(name="任我行").first()
 book = wo.book_set.create(title="吸星大法", price=300, pub_date="1999-9-19", publish=pub)
-**print**(book, type(book))
-**return** HttpResponse("ok")
+print(book, type(book))
+return HttpResponse("ok")
 ```
 
 **remove()**：从关联对象集中移除执行的模型对象。
@@ -2110,6 +2109,128 @@ res = models.Book.objects.filter(Q(pub_date__year=2004) | Q(pub_date__year=1999)
 print(res)  
 ```
 
+## Django Form 组件
+
+Django Form 组件用于对页面进行初始化，生成 HTML 标签，此外还可以对用户提交的数据进行校验（显示错误信息）。
+
+**报错信息显示顺序：**
+
+- 先显示字段属性中的错误信息，然后再显示局部钩子的错误信息。
+- 若显示了字段属性的错误信息，就不会显示局部钩子的错误信息。
+- 若有全局钩子，则全局钩子是等所有的数据都校验完，才开始进行校验，并且全局钩子的错误信息一定会显示。
+
+使用 Form 组件，需要先导入 forms， 接下来在 My_App 目录下创建一个 My_forms.py：
+
+```python
+from django import forms
+from django.core.exceptions import ValidationError
+from app01 import models
+
+class EmpForm(forms.Form):
+    name = forms.CharField(min_length=4, label="姓名", error_messages={"min_length": "你太短了", "required": "该字段不能为空!"})
+    age = forms.IntegerField(label="年龄")
+    salary = forms.DecimalField(label="工资")
+```
+
+**字段属性：**
+
+- **label**：输入框前面的文本信息。
+- **error_message**：自定义显示的错误信息，属性值是字典， 其中 required 为设置不能为空时显示的错误信息的 key。
+
+```python
+from django.shortcuts import render, HttpResponse
+from My_App.My_Forms import EmpForm
+from My_App import models
+from django.core.exceptions import ValidationError
+# Create your views here.
+
+
+def add_emp(request):
+    if request.method == "GET":
+        form = EmpForm()
+        return render(request, "add_emp.html", {"form": form})
+    else:
+        form = EmpForm(request.POST)
+        if form.is_valid():  # 进行数据校验
+            # 校验成功
+            data = form.cleaned_data  # 校验成功的值，会放在cleaned_data里。
+            data.pop('r_salary')
+            print(data)
+
+            models.Emp.objects.create(**data)
+            return HttpResponse(
+                'ok'
+            )
+            # return render(request, "add_emp.html", {"form": form})
+        else:
+            print(form.errors)    # 打印错误信息
+            clean_errors = form.errors.get("__all__")
+            print(222, clean_errors)
+        return render(request, "add_emp.html", {"form": form, "clean_errors": clean_errors})
+```
+
+HTML 模版：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+ 
+<h3>添加员工</h3>
+ 
+{#1、自己手动写HTML页面#}
+<form action="" method="post">
+    <p>姓名：<input type="text" name="name"></p>
+    <p>年龄：<input type="text" name="age"></p>
+    <p>工资：<input type="text" name="salary"></p>
+    <input type="submit">
+</form>
+ 
+{#2、通过form对象的as_p方法实现#}
+{#<form action="" method="post" novalidate>#}
+{#    {% csrf_token %}#}
+{#    {{ form.as_p }}#}
+{#    <input type="submit">#}
+{#</form>#}
+ 
+{#3、手动获取form对象的字段#}
+{#<form action="" method="post" novalidate>#}
+{#    {% csrf_token %}#}
+{#    <div>#}
+{#        <label for="id_{{ form.name.name }}">姓名</label>#}
+{#        {{ form.name }} <span>{{ form.name.errors.0 }}</span>#}
+{#    </div>#}
+{#    <div>#}
+{#        <label for="id_{{ form.age.name }}">年龄</label>#}
+{#        {{ form.age }} <span>{{ form.age.errors.0 }}</span>#}
+{#    </div>#}
+{#    <div>#}
+{#        <label for="id_salary">工资</label>#}
+{#        {{ form.salary }} <span>{{ form.salary.errors.0 }}</span>#}
+{#    </div>#}
+{#    <input type="submit">#}
+{#</form>#}
+ 
+ 
+{#4、用for循环展示所有字段#}
+{#<form action="" method="post" novalidate>#}
+{#    {% csrf_token %}#}
+{#    {% for field in form %}#}
+{#        <div>#}
+{#            <label for="id_{{ field.name }}">{{ field.label }}</label>#}
+{#            {{ field }} <span>{{ field.errors.0 }}</span>#}
+{#        </div>#}
+{#    {% endfor %}#}
+{#    <input type="submit">#}
+{#</form>#}
+ 
+</body>
+</html>
+```
 
 
 
@@ -2117,14 +2238,31 @@ print(res)
 
 
 
+## Django cookie 与 session
 
+Cookie 是存储在客户端计算机上的文本文件，并保留了各种跟踪信息。
 
+识别返回用户包括三个步骤：
 
-## Django 中 Cookie 的语法
+- 服务器脚本向浏览器发送一组 Cookie。例如：姓名、年龄或识别号码等。
+- 浏览器将这些信息存储在本地计算机上，以备将来使用。
+- 当下一次浏览器向 Web 服务器发送任何请求时，浏览器会把这些 Cookie 信息发送到服务器，服务器将使用这些信息来识别用户。
+
+HTTP 是一种"无状态"协议，这意味着每次客户端检索网页时，客户端打开一个单独的连接到 Web 服务器，服务器会自动不保留之前客户端请求的任何记录。
+
+但是仍然有以下三种方式来维持 Web 客户端和 Web 服务器之间的 session 会话：
+
+### Cookies
+
+一个 Web 服务器可以分配一个唯一的 session 会话 ID 作为每个 Web 客户端的 cookie，对于客户端的后续请求可以使用接收到的 cookie 来识别。
+
+在Web开发中，使用 session 来完成会话跟踪，session 底层依赖 Cookie 技术。
+
+#### Django 中 Cookie 的语法
 
 设置 cookie:
 
-```django
+```
 rep.set_cookie(key,value,...) 
 rep.set_signed_cookie(key,value,salt='加密盐',...)
 ```
@@ -2138,9 +2276,81 @@ request.COOKIES.get(key)
 删除 cookie:
 
 ```
-rep = HttpResponse || render || redirect 
+rep =HttpResponse || render || redirect 
 rep.delete_cookie(key)
 ```
+
+#### Session(保存在服务端的键值对)
+
+服务器在运行时可以为每一个用户的浏览器创建一个其独享的 session 对象，由于 session 为用户浏览器独享，所以用户在访问服务器的 web 资源时，可以把各自的数据放在各自的 session 中，当用户再去访问该服务器中的其它 web 资源时，其它 web 资源再从用户各自的 session 中取出数据为用户服务。
+
+##### 工作原理
+
+- a. 浏览器第一次请求获取登录页面 login。
+
+- b. 浏览器输入账号密码第二次请求，若输入正确，服务器响应浏览器一个 index 页面和一个键为 sessionid，值为随机字符串的 cookie，即 set_cookie ("sessionid",随机字符串)。
+
+- c. 服务器内部在 django.session 表中记录一条数据。
+
+  django.session 表中有三个字段。
+
+  - session_key：存的是随机字符串，即响应给浏览器的 cookie 的 sessionid 键对应的值。
+  - session_data：存的是用户的信息，即多个 request.session["key"]=value，且是密文。
+  - expire_date：存的是该条记录的过期时间（默认14天）
+
+- d. 浏览器第三次请求其他资源时，携带 cookie :{sessionid:随机字符串}，服务器从 django.session 表中根据该随机字符串取出该用户的数据，供其使用（即保存状态）。
+
+**注意:** django.session 表中保存的是浏览器的信息，而不是每一个用户的信息。 因此， 同一浏览器多个用户请求只保存一条记录（后面覆盖前面）,多个浏览器请求才保存多条记录。
+
+cookie 弥补了 http 无状态的不足，让服务器知道来的人是"谁"，但是 cookie 以文本的形式保存在浏览器端，安全性较差，且最大只支持 4096 字节，所以只通过 cookie 识别不同的用户，然后，在对应的 session 里保存私密的信息以及超过 4096 字节的文本。
+
+session 设置：
+
+```
+request.session["key"] = value
+```
+
+执行步骤：
+
+- a. 生成随机字符串
+- b. 把随机字符串和设置的键值对保存到 django_session 表的 session_key 和 session_data 里
+- c. 设置 **cookie：set_cookie("sessionid",随机字符串)** 响应给浏览器
+
+session 获取：
+
+```
+request.session.get('key')
+```
+
+执行步骤：
+
+- a. 从 cookie 中获取 sessionid 键的值，即随机字符串。
+- b. 根据随机字符串从 django_session 表过滤出记录。
+- c. 取出 session_data 字段的数据。
+
+session 删除，删除整条记录（包括 session_key、session_data、expire_date 三个字段）：
+
+```
+request.session.flush()
+```
+
+删除 session_data 里的其中一组键值对：
+
+```
+del request.session["key"]
+```
+
+执行步骤：
+
+- a. 从 cookie 中获取 sessionid 键的值，即随机字符串
+- b. 根据随机字符串从 django_session 表过滤出记录
+- c. 删除过滤出来的记录
+
+
+
+
+
+
 
 ## Django 中使用Redis
 
@@ -2277,4 +2487,175 @@ class MyPool(ConnectionPool):
 
 ## Django中的Middleware
 
-https://m.runoob.com/django/django-middleware.html
+Django 中间件是修改 Django request 或者 response 对象的钩子，可以理解为是介于 HttpRequest 与 HttpResponse 处理之间的一道处理过程。
+
+Django 中间件作用：
+
+- 修改请求，即传送到 view 中的 HttpRequest 对象。
+- 修改响应，即 view 返回的 HttpResponse 对象。
+
+中间件组件配置在 settings.py 文件的 MIDDLEWARE 选项列表中。
+
+配置中的每个字符串选项都是一个类，也就是一个中间件。
+
+### 自定义中间件
+
+中间件可以定义四个方法，分别是：
+
+```python
+process_request(self,request)
+process_view(self, request, view_func, view_args, view_kwargs)
+process_exception(self, request, exception)
+process_response(self, request, response)
+```
+
+自定义中间的步骤：
+
+在 app 目录下新建一个 py 文件，名字自定义，并在该 py 文件中导入 MiddlewareMixin：
+
+```python
+from django.utils.deprecation import MiddlewareMixin
+```
+
+自定义的中间件类，要继承父类 MiddlewareMixin:
+
+```
+class MD1(MiddlewareMixin): 
+    pass
+```
+
+在 settings.py 中的 MIDDLEWARE 里注册自定义的中间件类。
+
+### 自定义中间件类的方法
+
+自定义中间件类的方法有：process_request 和 process_response。
+
+#### process_request 方法
+
+process_request 方法有一个参数 request，这个 request 和视图函数中的 request 是一样的。
+
+process_request 方法的返回值可以是 None 也可以是 HttpResponse 对象。
+
+- 返回值是 None 的话，按正常流程继续走，交给下一个中间件处理。
+- 返回值是 HttpResponse 对象，Django 将不执行后续视图函数之前执行的方法以及视图函数，直接以该中间件为起点，倒序执行中间件，且执行的是视图函数之后执行的方法。
+
+process_request 方法是在视图函数之前执行的。
+
+当配置多个中间件时，会按照 MIDDLEWARE中 的注册顺序，也就是列表的索引值，顺序执行。
+
+不同中间件之间传递的 request 参数都是同一个请求对象。
+
+#### process_response方法
+
+process_response 方法有两个参数，一个是 request，一个是 response，request 是请求对象，response 是视图函数返回的 HttpResponse 对象，该方法必须要有返回值，且必须是response。
+
+process_response 方法是在视图函数之后执行的。
+
+当配置多个中间件时，会按照 MIDDLEWARE 中的注册顺序，也就是列表的索引值，倒序执行。
+
+```python
+# 实例
+class MD1(MiddlewareMixin):
+    def process_request(self, request):
+        print("md1  process_request 方法。", id(request)) #在视图之前执行
+
+
+    def process_response(self,request, response): :#基于请求响应
+        print("md1  process_response 方法！", id(request)) #在视图之后
+        return response
+```
+
+#### process_view方法
+
+process_view 方法格式如下：
+
+```python
+process_view(request, view_func, view_args, view_kwargs)
+```
+
+process_view 方法有四个参数：
+
+- request 是 HttpRequest 对象。
+- view_func 是 Django 即将使用的视图函数。
+- view_args 是将传递给视图的位置参数的列表。
+- view_kwargs 是将传递给视图的关键字参数的字典。
+
+view_args 和 view_kwargs 都不包含第一个视图参数（request）。
+
+process_view 方法是在视图函数之前，process_request 方法之后执行的。
+
+返回值可以是 None、view_func(request) 或 HttpResponse 对象。
+
+- 返回值是 None 的话，按正常流程继续走，交给下一个中间件处理。
+- 返回值是 HttpResponse 对象，Django 将不执行后续视图函数之前执行的方法以及视图函数，直接以该中间件为起点，倒序执行中间件，且执行的是视图函数之后执行的方法。
+- c.返回值是 view_func(request)，Django 将不执行后续视图函数之前执行的方法，提前执行视图函数，然后再倒序执行视图函数之后执行的方法。
+- 当最后一个中间件的 process_request 到达路由关系映射之后，返回到第一个中间件 process_view，然后依次往下，到达视图函数。
+
+```python
+# 实例
+class MD1(MiddlewareMixin):
+    def process_request(self, request):
+        print("md1  process_request 方法。", id(request)) #在视图之前执行
+
+
+    def process_response(self,request, response): :#基于请求响应
+        print("md1  process_response 方法！", id(request)) #在视图之后
+        return response
+
+
+    def process_view(self,request, view_func, view_args, view_kwargs):
+        print("md1  process_view 方法！") #在视图之前执行 顺序执行
+        #return view_func(request)
+```
+
+#### process_exception方法
+
+process_exception 方法如下：
+
+```
+process_exception(request, exception)
+```
+
+参数说明：
+
+- request 是 HttpRequest 对象。
+- exception 是视图函数异常产生的 Exception 对象。
+
+process_exception 方法只有在视图函数中出现异常了才执行，按照 settings 的注册倒序执行。
+
+在视图函数之后，在 process_response 方法之前执行。
+
+process_exception 方法的返回值可以是一个 None 也可以是一个 HttpResponse 对象。
+
+返回值是 None，页面会报 500 状态码错误，视图函数不会执行。
+
+process_exception 方法倒序执行，然后再倒序执行 process_response 方法。
+
+返回值是 HttpResponse 对象，页面不会报错，返回状态码为 200。
+
+视图函数不执行，该中间件后续的 process_exception 方法也不执行，直接从最后一个中间件的 process_response 方法倒序开始执行。
+
+若是 process_view 方法返回视图函数，提前执行了视图函数，且视图函数报错，则无论 process_exception 方法的返回值是什么，页面都会报错， 且视图函数和 process_exception 方法都不执行。
+
+直接从最后一个中间件的 process_response 方法开始倒序执行：
+
+```python
+# 实例
+class MD1(MiddlewareMixin):
+    def process_request(self, request):
+        print("md1  process_request 方法。", id(request)) #在视图之前执行
+
+    def process_response(self,request, response): :#基于请求响应
+        print("md1  process_response 方法！", id(request)) #在视图之后
+        return response
+
+    def process_view(self,request, view_func, view_args, view_kwargs):
+        print("md1  process_view 方法！") #在视图之前执行 顺序执行
+        #return view_func(request)
+
+
+    def process_exception(self, request, exception):#引发错误 才会触发这个方法
+        print("md1  process_exception 方法！")
+        # return HttpResponse(exception) #返回错误信息
+```
+
