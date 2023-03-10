@@ -2588,7 +2588,7 @@ process_view 方法是在视图函数之前，process_request 方法之后执行
 
 - 返回值是 None 的话，按正常流程继续走，交给下一个中间件处理。
 - 返回值是 HttpResponse 对象，Django 将不执行后续视图函数之前执行的方法以及视图函数，直接以该中间件为起点，倒序执行中间件，且执行的是视图函数之后执行的方法。
-- c.返回值是 view_func(request)，Django 将不执行后续视图函数之前执行的方法，提前执行视图函数，然后再倒序执行视图函数之后执行的方法。
+- 返回值是 view_func(request)，Django 将不执行后续视图函数之前执行的方法，提前执行视图函数，然后再倒序执行视图函数之后执行的方法。
 - 当最后一个中间件的 process_request 到达路由关系映射之后，返回到第一个中间件 process_view，然后依次往下，到达视图函数。
 
 ```python
@@ -2657,5 +2657,83 @@ class MD1(MiddlewareMixin):
     def process_exception(self, request, exception):#引发错误 才会触发这个方法
         print("md1  process_exception 方法！")
         # return HttpResponse(exception) #返回错误信息
+```
+
+## Django 视图 - FBV 与 CBV
+
+**FBV（function base views）** 基于函数的视图，就是在视图里使用函数处理请求。
+
+**CBV（class base views）** 基于类的视图，就是在视图里使用类处理请求。
+
+### FBV
+
+基于函数的视图其实我们前面章节一直在使用，就是使用了函数来处理用户的请求，查看以下实例：
+
+路由配置：
+
+```python
+# urls.py 文件
+urlpatterns = [
+    path("login/", views.login),
+]
+
+# views.py 文件
+from django.shortcuts import render,HttpResponse
+
+def login(request):
+    if request.method == "GET":
+        return HttpResponse("GET 方法")
+    if request.method == "POST":
+        user = request.POST.get("user")
+        pwd = request.POST.get("pwd")
+        if user == "runoob" and pwd == "123456":
+            return HttpResponse("POST 方法")
+        else:
+            return HttpResponse("POST 方法1")
+```
+
+如果我们在浏览器中直接访问 http://127.0.0.1:8000/login/ ，输出结果为：
+
+```
+GET 方法
+```
+
+### CBV
+
+基于类的视图，就是使用了类来处理用户的请求，不同的请求我们可以在类中使用不同方法来处理，这样大大的提高了代码的可读性。
+
+定义的类要继承父类 View，所以需要先引入库：
+
+```
+from django.views import View
+```
+
+执行对应请求的方法前会优先执行 dispatch 方法(在get/post/put...方法前执行)，dispatch() 方法会根据请求的不同调用相应的方法来处理。
+
+其实，在我们前面学到的知识都知道 Django 的 url 是将一个请求分配给可调用的函数的，而不是一个类，那是如何实现基于类的视图的呢？ 主要还是通过父类 View 提供的一个静态方法 as_view() ，as_view 方法是基于类的外部接口， 他返回一个视图函数，调用后请求会传递给 dispatch 方法，dispatch 方法再根据不同请求来处理不同的方法。
+
+路由配置：
+
+```python
+# urls.py 文件
+urlpatterns = [
+    path("login/", views.Login.as_view()),
+]
+
+# views.py 文件
+from django.shortcuts import render,HttpResponse
+from django.views import View
+
+class Login(View):
+    def get(self,request):
+        return HttpResponse("GET 方法")
+
+    def post(self,request):
+        user = request.POST.get("user")
+        pwd = request.POST.get("pwd")
+        if user == "runoob" and pwd == "123456":
+            return HttpResponse("POST 方法")
+        else:
+            return HttpResponse("POST 方法 1")
 ```
 
