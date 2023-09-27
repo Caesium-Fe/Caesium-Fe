@@ -45,7 +45,7 @@ nginx分两种版本安装，生产环境一般是linux，而学习环境为wind
 '2.关闭服务：并不能通过直接关闭cmd，来进行关闭nginx服务，需同路径下新开一个cmd，输入nginx.exe -s stop指令进行关闭, 若关闭cmd后，需将nginx服务的所有进程关闭才算关闭。 
 '注意：直接右键进程是关闭不掉进程的，这时需要将所有的nginx进程全部杀死，操作步骤如下：
 '1.查看所有端口并找到使用nginx服务端口的进程号------ netstat -ano
-'2.通过找到的进程号找到所有nginx.exe的进程--------- tasklist | findstr "****"(pid number)
+'2.通过找到的进程号找到所有nginx.exe的进程--------- tasklist | findstr "****"(pid number) 1180  9280  9608  4416  11232
 '3.结束所有进程：-------------------------------- taskkill /f /t /im nginx.exe
 '4.最后验证下服务是否关闭就ok了。
 
@@ -144,6 +144,20 @@ use epoll;
 worker_connections 65535;
 }
 
+## MySQL服务器，端口9998（集群环境）
+
+stream{
+    upstream mysql_socket{
+        server 192.168.174.131:3306;
+    }
+    server{
+        listen 9998;
+        proxy_pass mysql_socket;
+    }
+}
+
+
+
 ## 设定http服务器
 
 http
@@ -202,6 +216,14 @@ server_name ably.com;
 \#  HTTP 自动跳转 HTTPS
 rewrite ^(.*) https://$server_name$1 permanent;
 }
+
+#server_name的域名需要在host和hosts文件里进行添加     修改如下：
+
+host：添加   www.XXXX.com  127.0.0.1
+
+hosts： 添加  127.0.0.1   www.XXXX.com
+
+
 
 server
 {
@@ -420,7 +442,6 @@ The host is 192.168.0.7(Docker03) - Node 2!
 #启动192.168.0.7（Nginx-Node2/Nginx-Web2）
 
 $ docker run -d -p 6666:80 --name nginx-node2 -v $(pwd)/html:/usr/share/nginx/html --restart always nginx
-
 
 
 

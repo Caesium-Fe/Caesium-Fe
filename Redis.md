@@ -22,6 +22,24 @@
 
 监视key是否被改动过：watch 在发现key被更改后，在执行EXEC是就会返回nil，表示事务无法被触发。
 
+## Linux版本
+
+```
+ 查看redis是否正常打开指令
+ ps aux | grep redis-server
+ 
+ 连接redis指令
+ redis-cli
+ 
+ 如果出现NOAUTH Authentication required
+ 使用： auth 密码 ，就可以解决
+ 
+ 
+ 
+```
+
+
+
 ### string类型
 
 ```redis
@@ -220,5 +238,22 @@ from django_redis import get_redis_connection
 def login(request):
     conn = get_redis_connection('sms_code')  # 默认key是:default(settings中配置的)
     conn.set('xx3', 'oo3')
+    
+目前没有使用这个方式。
+from django.core.cache import cache
+这个方式似乎不需要再次进行连接，而是在django在加载配置文件时，就预先连接好了。
+cache.get(key)； cache.set(key, value)
+```
+
+## 使用redis时出现过的问题：
+
+```
+1.在代码中设置了当天日期（字符串类型）作为key，可是在redis库中查看key为前缀添加了':1:'字符，导致直接查看库内容，查找不到，但是不影响代码执行。
+	使用的指令：keys *用于查看redis中的键值。
+可是这个 ':1:'字符 不知道从哪来的？？？
+这个是django自带的缓存键版本，所以这个在redis-cli中查看这个键值时，查找不到，但是这个并不会影响到cache.get，因为这个会自动添加上版本号，所以影响不大。
+2.
+
+
 ```
 
