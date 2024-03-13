@@ -38,7 +38,17 @@ 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
 
 修改现有项目的url的请求 git remote set-url origin https://<你的令牌>@github.com/<你的git用户名>/<要修改的仓库名>.git
 
+git remote add origin <远程仓库 URL>     添加远程仓库
+
+git branch --set-upstream-to=origin/remote_name local_name  由于本地分支与远程分支没有联系，所以无法Git pull，用这个办法解决     remote_name：远程分支名     local_name：本地分支名
+
+main master
+
 # Git建分支的基本步骤
+
+```
+先合并本地分支，完事把对应分支提交到远端仓库，同步后，就可以删除不需要的分支了。
+```
 
 1.本地建立分支并切换到分支上
 git checkout -b dev  ------>git branch dev 和 git checkout dev

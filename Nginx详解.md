@@ -447,5 +447,14 @@ $ docker run -d -p 6666:80 --name nginx-node2 -v $(pwd)/html:/usr/share/nginx/ht
 
 
 
+# Nginx遇到的问题
 
+```shell
+1.修改Nginx.conf文件后启动Nginx，没有正常启动，查看出错日志： #问题没有解决
+[alert] 19696#22104: the event "ngx_master_19696" was not signaled for 5s
+遇到以上问题，解决办法：
+	将修改全部恢复，仍没有正常启动，将nginx重装后任然没用；查看端口使用情况，并无发现有进程在占用；怀疑是机器资源不足。。。
+	# 重启电脑后解决。
+2
+```
 
