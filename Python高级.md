@@ -221,6 +221,16 @@ sys.platform       返回操作系统平台名称
 
 装饰器就是不改变函数的调用形式，但是对函数进行了功能上的修改。
 
+
+
+```
+hello, my name is fengguanghao, from wuhan,hubei province.i'm twenty-four years old.i'm graduated from Yangtze university college of engineering technology.i have been working for software development two years in here after graduation.so this is my firist job in my life.
+in my work,i need to assist other departmens in converting the provided test data into various image reports according to the provided test logic.the image reports styles include boxplots,barplots,cpk_lineplots.
+this is my indroduction, thanks for your listeni
+```
+
+
+
 # pandas使用
 
 ## pandas处理excel
